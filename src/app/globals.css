@@ -1,0 +1,239 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-barlow-condensed);
+  --font-barlow: var(--font-barlow-condensed);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-heading: var(--font-barlow-condensed);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* ─── Dark-only theme — Rep UI kit "graphite + lime" ─────────────────────── */
+/* Applied unconditionally. The .dark alias keeps class-based selectors working. */
+:root,
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces — true neutral charcoal, NO blue hue */
+  --background: #090909;
+  --card: #111111;
+  --popover: #111111;
+  --muted: #191919;
+  --secondary: #191919;
+  --sidebar: #060606;
+
+  /* Ink */
+  --foreground: #f1ede5;
+  --card-foreground: #f1ede5;
+  --popover-foreground: #f1ede5;
+  --muted-foreground: #aeb9cc;
+  --secondary-foreground: #ced5e2;
+  --sidebar-foreground: #f1ede5;
+
+  /* Accent — Rep's signature lime */
+  --primary: #c8ff00;
+  --primary-foreground: #0a0c10;
+  --accent: #c8ff00;
+  --accent-foreground: #0a0c10;
+  --sidebar-primary: #c8ff00;
+  --sidebar-primary-foreground: #0a0c10;
+  --sidebar-accent: #1e2610;
+  --sidebar-accent-foreground: #d4ff3f;
+
+  /* Lines & states */
+  --border: #272727;
+  --input: #272727;
+  --ring: #c8ff00;
+  --sidebar-border: #272727;
+  --sidebar-ring: #c8ff00;
+  --destructive: oklch(0.65 0.22 27);
+
+  /* Charts */
+  --chart-1: #c8ff00;
+  --chart-2: #87d9af;
+  --chart-3: oklch(0.58 0.2 260);
+  --chart-4: oklch(0.75 0.15 85);
+  --chart-5: oklch(0.65 0.22 15);
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Glass */
+  --glass-bg: rgba(22, 22, 22, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-card-bg: rgba(14, 14, 14, 0.85);
+  --glass-card-border: rgba(255, 255, 255, 0.07);
+
+  /* Gradients */
+  --gradient-text-1: #c8ff00;
+  --gradient-text-2: #f1ede5;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "kern" 1;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    @apply font-sans;
+    font-family: var(--font-barlow-condensed), system-ui, sans-serif;
+    /* NOTE: no scroll-behavior:smooth — Lenis handles this */
+  }
+
+  /* Switch to Tajawal for Arabic and globally prevent letter-spacing which breaks glyph joining */
+  html[dir="rtl"],
+  html[dir="rtl"] * {
+    font-family: var(--font-tajawal), system-ui, sans-serif !important;
+    letter-spacing: 0 !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-barlow-condensed), system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Arabic headings */
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] h5,
+  html[dir="rtl"] h6 {
+    font-family: var(--font-tajawal), system-ui, sans-serif;
+    letter-spacing: 0 !important;
+    text-transform: none;
+  }
+
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: oklch(0.72 0.21 48 / 40%);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.72 0.21 48 / 70%);
+  }
+
+  /* NOTE: removed `img { content-visibility: auto }` — without contain-intrinsic-size
+     it makes images collapse/re-layout while scrolling, causing jank. */
+}
+
+/* Utility: Glow effect for primary elements */
+@layer utilities {
+  .glow-primary {
+    box-shadow: 0 0 20px var(--primary), 0 0 40px calc(var(--primary) / 0.5);
+  }
+
+  .glow-primary-sm {
+    box-shadow: 0 0 10px calc(var(--primary) / 0.8);
+  }
+
+  .text-accent {
+    color: var(--primary);
+  }
+
+  .text-gradient {
+    color: var(--primary);
+  }
+
+  .text-gradient-cool {
+    color: var(--primary);
+  }
+
+  /* Glass elements need GPU layer promotion for backdrop-filter perf */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .glass-card {
+    background: var(--glass-card-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-card-border);
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+}
+
+/* Accessibility: disable animations for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
