@@ -2,7 +2,7 @@
 
 FitCoach is an online fitness coaching platform. Clients get a personalized workout, diet, and accountability loop. Coaches (admin) run the business: packages, payments, plans, and messaging.
 
-The frontend is a Next.js app. It talks to the FitCoach API at `NEXT_PUBLIC_API_URL` (default `http://localhost:5000/api/v1`).
+The frontend is a Next.js app. Browser requests go through its internal `/api/v1` route; the upstream FitCoach API URL remains server-only in `FITCOACH_API_URL`.
 
 ---
 
@@ -15,7 +15,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-Optional: set `NEXT_PUBLIC_API_URL` in `.env.local` if the API is not on localhost:5000.
+Set `FITCOACH_API_URL` in `.env.local` to the upstream API URL (for example, `http://localhost:5000/api/v1`). Do not use a `NEXT_PUBLIC_` prefix: this value is read only by the server-side API proxy.
 
 | Script | What it does |
 | --- | --- |
