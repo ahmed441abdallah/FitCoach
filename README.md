@@ -95,6 +95,63 @@ All coach tools live under `/admin`.
 
 ---
 
+## Coaching workflow diagrams
+
+### Client journey
+
+```mermaid
+flowchart LR
+    A[Discover FitCoach] --> B[Create an account]
+    B --> C[Complete 5-step intake]
+    C --> D[Choose package and checkout]
+    D --> E[Upload payment proof]
+    E --> F{Coach approves?}
+    F -- Pending / rejected --> G[View subscription status and resolve payment]
+    G --> E
+    F -- Approved --> H[Receive workout and diet plans]
+    H --> I[Train and log workouts]
+    I --> J[Track measurements and photos]
+    J --> K[Chat with coach for support or changes]
+    K --> I
+    J --> L[Renew before subscription ends]
+```
+
+### Coach workflow
+
+```mermaid
+flowchart LR
+    A[Open admin dashboard] --> B[Review payment proof]
+    B --> C{Payment valid?}
+    C -- No --> D[Reject or request correction]
+    C -- Yes --> E[Activate subscription]
+    E --> F[Review client intake and photos]
+    F --> G[Build and assign workout plan]
+    G --> H[Build and assign diet plan]
+    H --> I[Reply to messages and adjust plans]
+    I --> J[Review progress and expiring subscriptions]
+    J --> I
+```
+
+### Shared coaching loop
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant FitCoach
+    participant Coach
+
+    Client->>FitCoach: Submit intake, package choice, and payment proof
+    FitCoach->>Coach: Show pending subscription
+    Coach->>FitCoach: Approve payment and assign plans
+    FitCoach-->>Client: Notify client that plans are ready
+    Client->>FitCoach: Log workouts and progress updates
+    Coach->>FitCoach: Review progress and tailor plans
+    Client->>Coach: Ask questions in chat
+    Coach-->>Client: Reply with guidance or plan adjustments
+```
+
+---
+
 ## Client story — Layla wants to lose fat
 
 Layla finds FitCoach on her phone. She reads how coaching works: pick a plan, pay, fill an assessment, receive a program. She tries the calorie calculator, then browses the exercise library so she knows what training looks like.
