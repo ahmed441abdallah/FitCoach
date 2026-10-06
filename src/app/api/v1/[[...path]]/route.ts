@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { FITCOACH_API_URL } from "@/lib/server-config";
+import { getFitcoachApiUrl } from "@/lib/server-config";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,7 +27,7 @@ const responseHeadersToRemove = [
 
 async function proxy(request: NextRequest, context: RouteContext) {
   const { path = [] } = await context.params;
-  const upstreamUrl = new URL(`${FITCOACH_API_URL}/${path.join("/")}`);
+  const upstreamUrl = new URL(`${getFitcoachApiUrl()}/${path.join("/")}`);
   upstreamUrl.search = request.nextUrl.search;
 
   const headers = new Headers(request.headers);
