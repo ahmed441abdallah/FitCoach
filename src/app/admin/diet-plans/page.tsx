@@ -466,7 +466,7 @@ export default function DietPlansPage() {
                       <span className="text-[9px] font-extrabold text-violet-300">{getInitials(plan.client?.userName || "")}</span>
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-white/80 truncate">{plan.client?.userName || "â€”"}</p>
+                      <p className="text-sm font-semibold text-white/80 truncate">{plan.client?.userName || "-"}</p>
                       <p className="text-[9px] text-white/30 truncate">{plan.client?.email || ""}</p>
                     </div>
                   </div>
@@ -521,7 +521,7 @@ export default function DietPlansPage() {
             </p>
             {!search && (
               <Link href="/admin/diet-builder" className="text-[#c8fe1b] text-xs font-bold uppercase tracking-widest hover:underline">
-                Create your first diet plan â†’
+                Create your first diet plan →
               </Link>
             )}
           </div>

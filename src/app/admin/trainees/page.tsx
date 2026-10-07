@@ -327,7 +327,7 @@ export default function TraineesPage() {
             </div>
             <div>
               <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-0.5">{s.label}</p>
-              <p className="text-white text-2xl font-extrabold leading-none">{loading ? "â€”" : s.value}</p>
+              <p className="text-white text-2xl font-extrabold leading-none">{loading ? "-" : s.value}</p>
             </div>
           </motion.div>
         ))}
@@ -401,7 +401,7 @@ export default function TraineesPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="text-white text-sm font-bold truncate">{c.user.email}</p>
-                        <p className="text-white/30 text-[10px] mt-0.5">{c.user.phoneNumber || "â€”"}</p>
+                        <p className="text-white/30 text-[10px] mt-0.5">{c.user.phoneNumber || "-"}</p>
                       </div>
                     </div>
 
@@ -468,7 +468,7 @@ export default function TraineesPage() {
         {/* Pagination */}
         <div className="px-6 py-3.5 border-t border-white/[0.05] flex items-center justify-between bg-white/[0.01]">
           <p className="text-white/25 text-xs font-semibold">
-            Page {page} of {totalPages || 1} Â· {total} total
+            Page {page} of {totalPages || 1} · {total} total
           </p>
           <div className="flex gap-1 items-center">
             <button

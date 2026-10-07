@@ -1,10 +1,10 @@
 "use client";
 import { useState, useCallback, useId, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { login, reset } from "@/lib/features/auth/authSlice";
-import { Eye, EyeOff, Dumbbell, Zap, Trophy, Target, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Eye, EyeOff, Dumbbell, Zap, Trophy, Target, ArrowRight, CheckCircle2, Lock, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TransitionLink } from "@/components/layout/TransitionLink";
 import { useTranslations } from "next-intl";
@@ -41,12 +41,14 @@ function FloatingInput({
   id,
   label,
   error,
+  icon: Icon,
   className,
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & {
   id: string;
   label: string;
   error?: string;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
 }) {
   const [focused, setFocused] = useState(false);
   const hasValue = !!props.value && String(props.value).length > 0;
@@ -54,7 +56,15 @@ function FloatingInput({
 
   return (
     <div className="relative">
-      <div className="relative group">
+      <div className="relative">
+        {Icon && (
+          <div className={cn(
+            "absolute start-4 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none",
+            focused ? "text-primary" : "text-foreground/35"
+          )}>
+            <Icon size={15} />
+          </div>
+        )}
         <input
           id={id}
           aria-invalid={!!error}
@@ -62,11 +72,12 @@ function FloatingInput({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className={cn(
-            "peer w-full rounded-2xl border-2 bg-transparent px-4 pt-6 pb-2.5 text-sm text-foreground",
+            "peer w-full rounded-2xl border-2 bg-transparent py-3.5 text-sm text-foreground",
             "transition-all duration-300 outline-none",
-            "placeholder:text-transparent rtl:text-right",
+            "placeholder:text-transparent",
+            Icon ? "ps-10 pe-4 pt-6 pb-2.5" : "px-4 pt-6 pb-2.5",
             focused
-              ? "border-primary ring-4 ring-primary/15"
+              ? "border-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]"
               : error
                 ? "border-destructive/60"
                 : "border-foreground/12 dark:border-foreground/10 hover:border-foreground/25",
@@ -78,7 +89,8 @@ function FloatingInput({
         <label
           htmlFor={id}
           className={cn(
-            "pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right",
+            "pointer-events-none absolute top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right",
+            Icon ? "start-10" : "start-4",
             floated
               ? "top-3.5 translate-y-0 scale-[0.78] text-xs"
               : "scale-100",
@@ -91,7 +103,6 @@ function FloatingInput({
         >
           {label}
         </label>
-        {/* Focus bar */}
         <motion.div
           className="absolute bottom-0 inset-x-4 h-0.5 rounded-full bg-primary origin-center"
           initial={{ scaleX: 0 }}
@@ -111,7 +122,7 @@ function FloatingInput({
             transition={{ duration: 0.2 }}
             className="mt-1.5 ms-1 text-xs text-destructive flex items-center gap-1"
           >
-            <span className="inline-block w-3.5 h-3.5 rounded-full border border-destructive/50 text-center leading-[14px] shrink-0">!</span>
+            <span className="inline-block w-3.5 h-3.5 rounded-full border border-destructive/50 text-center leading-[14px] shrink-0 text-[10px]">!</span>
             {error}
           </motion.p>
         )}
@@ -140,8 +151,14 @@ function FloatingPasswordInput({
   const floated = focused || hasValue;
 
   return (
-    <div className="relative">
+    <div>
       <div className="relative">
+        <div className={cn(
+          "absolute start-4 top-1/2 -translate-y-1/2 transition-colors duration-200 pointer-events-none",
+          focused ? "text-primary" : "text-foreground/35"
+        )}>
+          <Lock size={15} />
+        </div>
         <input
           id={id}
           type={show ? "text" : "password"}
@@ -152,9 +169,8 @@ function FloatingPasswordInput({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           className={cn(
-            "peer w-full rounded-2xl border-2 bg-transparent px-4 pt-6 pb-2.5 text-sm text-foreground pe-12",
-            "transition-all duration-300 outline-none",
-            "placeholder:text-transparent rtl:text-right",
+            "peer w-full rounded-2xl border-2 bg-transparent ps-10 pe-12 pt-6 pb-2.5 text-sm text-foreground",
+            "transition-all duration-300 outline-none placeholder:text-transparent",
             focused
               ? "border-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]"
               : error
@@ -166,7 +182,7 @@ function FloatingPasswordInput({
         <label
           htmlFor={id}
           className={cn(
-            "pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right",
+            "pointer-events-none absolute top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right start-10",
             floated ? "top-3.5 translate-y-0 scale-[0.78] text-xs" : "scale-100",
             focused ? "text-primary" : error ? "text-destructive" : "text-foreground/50"
           )}
@@ -180,7 +196,7 @@ function FloatingPasswordInput({
           tabIndex={-1}
           className="absolute end-4 top-1/2 -translate-y-1/2 text-foreground/40 hover:text-foreground transition-colors"
         >
-          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+          {show ? <EyeOff size={15} /> : <Eye size={15} />}
         </button>
         <motion.div
           className="absolute bottom-0 inset-x-4 h-0.5 rounded-full bg-primary origin-center"
@@ -189,6 +205,7 @@ function FloatingPasswordInput({
           transition={{ duration: 0.25, ease: "easeOut" }}
         />
       </div>
+      
       <AnimatePresence mode="wait">
         {error && (
           <motion.p
@@ -201,7 +218,7 @@ function FloatingPasswordInput({
             transition={{ duration: 0.2 }}
             className="mt-1.5 ms-1 text-xs text-destructive flex items-center gap-1"
           >
-            <span className="inline-block w-3.5 h-3.5 rounded-full border border-destructive/50 text-center leading-[14px] shrink-0">!</span>
+            <span className="inline-block w-3.5 h-3.5 rounded-full border border-destructive/50 text-center leading-[14px] shrink-0 text-[10px]">!</span>
             {error}
           </motion.p>
         )}
@@ -377,6 +394,7 @@ export default function LoginPage() {
   const tc = useTranslations("common");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { user, isLoading, isError, isSuccess, message } = useAppSelector((state) => state.auth);
 
@@ -388,7 +406,21 @@ export default function LoginPage() {
     if (isSuccess || user) {
       setSuccess(true);
       const timer = setTimeout(() => {
-        if (user?.role === 'admin') {
+        const redirect = searchParams.get('redirect');
+        let sessionRedirect = null;
+        try {
+          const pending = sessionStorage.getItem("pendingCheckoutPlan");
+          if (pending) {
+            const { packageId, optionId } = JSON.parse(pending);
+            sessionRedirect = `/checkout?packageId=${packageId}&optionId=${optionId}`;
+          }
+        } catch (e) { }
+
+        if (redirect) {
+          router.push(redirect);
+        } else if (sessionRedirect) {
+          router.push(sessionRedirect);
+        } else if (user?.role === 'admin') {
           router.push('/admin');
         } else {
           router.push('/');
@@ -398,7 +430,7 @@ export default function LoginPage() {
     }
 
     dispatch(reset());
-  }, [user, isError, isSuccess, message, router, dispatch]);
+  }, [user, isError, isSuccess, message, router, dispatch, searchParams]);
 
   const set = useCallback(
     (key: keyof typeof form) =>
@@ -510,6 +542,7 @@ export default function LoginPage() {
                     id={`${uid}-identifier`}
                     label={t("email")}
                     type="text"
+                    icon={Mail}
                     value={form.identifier}
                     onChange={set("identifier")}
                     error={errors.identifier}
@@ -619,7 +652,7 @@ export default function LoginPage() {
             <p className="text-center text-sm text-muted-foreground">
               {t("noAccount")}{" "}
               <TransitionLink
-                href="/register"
+                href={searchParams.get("redirect") ? `/register?redirect=${encodeURIComponent(searchParams.get("redirect") as string)}` : "/register"}
                 className="text-primary hover:text-primary/80 transition-colors font-bold uppercase tracking-wider text-xs"
               >
                 {t("signUp")}

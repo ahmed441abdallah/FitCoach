@@ -12,7 +12,6 @@ import {
 import axiosInstance from "@/lib/axios";
 import Link from "next/link";
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface WorkoutPlan {
   _id: string;
   planName: string;
@@ -45,7 +44,6 @@ type EditDay = {
   }[];
 };
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const BODY_PART_COLORS: Record<string, string> = {
   chest: "#c8fe1b", back: "#7c3aed", legs: "#2563eb",
   shoulders: "#d97706", arms: "#db2777", "upper arms": "#db2777",
@@ -56,10 +54,17 @@ const getBPC = (bp: string) => BODY_PART_COLORS[bp?.toLowerCase()] || "#6b7280";
 const fmtDate = (d: string) => new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 const getInitials = (name: string) => name?.slice(0, 2).toUpperCase() || "??";
 
-// â”€â”€â”€ Detail Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function DetailDrawer({ plan, onClose, onEdit, onDelete }: {
   plan: WorkoutPlan; onClose: () => void; onEdit: () => void; onDelete: () => void;
 }) {
+  const [exPool, setExPool] = useState<{ _id: string; name: string; bodyPart: string }[]>([]);
+
+  useEffect(() => {
+    axiosInstance.get("/exercises?limit=2000", { withCredentials: true })
+      .then(res => { if (res.data.success) setExPool(res.data.data); })
+      .catch(() => { });
+  }, []);
+
   const totalEx = plan.days.reduce((a, d) => a + d.exercises.length, 0);
   return (
     <motion.div
@@ -114,8 +119,10 @@ function DetailDrawer({ plan, onClose, onEdit, onDelete }: {
               </div>
               <div className="p-3 space-y-2">
                 {day.exercises.map((ex, eIdx) => {
-                  const name = ex.exerciseId?.name || "Unknown Exercise";
-                  const bp = ex.exerciseId?.bodyPart || "";
+                  const stringId = typeof ex.exerciseId === 'string' ? ex.exerciseId : (ex.exerciseId as any)?._id;
+                  const realEx = exPool.find(e => e._id === stringId);
+                  const name = realEx?.name || (ex.exerciseId as any)?.name || (ex as any).name || (ex as any).exerciseName || "Unknown Exercise";
+                  const bp = realEx?.bodyPart || (ex.exerciseId as any)?.bodyPart || (ex as any).bodyPart || (ex as any).target || "General";
                   const color = getBPC(bp);
                   return (
                     <div key={ex._id || eIdx} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
@@ -127,7 +134,7 @@ function DetailDrawer({ plan, onClose, onEdit, onDelete }: {
                         <p className="text-[9px] text-white/30 capitalize">{bp}</p>
                       </div>
                       <div className="flex items-center gap-3 text-xs flex-shrink-0">
-                        <span className="font-extrabold text-[#c8fe1b]">{ex.sets}Ã—{ex.reps}</span>
+                        <span className="font-extrabold text-[#c8fe1b]">{ex.sets}x{ex.reps}</span>
                         {ex.restTimeMinutes > 0 && <span className="text-white/30 font-semibold">{ex.restTimeMinutes}m rest</span>}
                       </div>
                     </div>
@@ -201,7 +208,15 @@ function EditModal({ plan, onClose, onSave }: {
     setSaving(true);
     await onSave(plan._id, {
       planName, description, notes,
-      days: days.map(d => ({ dayName: d.dayName, exercises: d.exercises.filter(e => e.exerciseId).map(e => ({ exerciseId: e.exerciseId!._id, sets: e.sets, reps: e.reps, restTimeMinutes: e.restTimeMinutes })) }))
+      days: days.map(d => ({
+        dayName: d.dayName,
+        exercises: d.exercises.filter(e => e.exerciseId).map(e => ({
+          exerciseId: typeof e.exerciseId === "string" ? e.exerciseId : e.exerciseId!._id,
+          sets: e.sets,
+          reps: e.reps,
+          restTimeMinutes: e.restTimeMinutes
+        }))
+      }))
     });
     setSaving(false);
   };
@@ -287,8 +302,10 @@ function EditModal({ plan, onClose, onSave }: {
                   <div className="p-3 space-y-2">
                     <AnimatePresence>
                       {day.exercises.map((ex, exIdx) => {
-                        const name = ex.exerciseId?.name || "Unknown";
-                        const bp = ex.exerciseId?.bodyPart || "";
+                        const stringId = typeof ex.exerciseId === 'string' ? ex.exerciseId : (ex.exerciseId as any)?._id;
+                        const realEx = exPool.find(e => e._id === stringId);
+                        const name = realEx?.name || (ex.exerciseId as any)?.name || (ex as any).name || (ex as any).exerciseName || "Unknown Exercise (Re-save plan)";
+                        const bp = realEx?.bodyPart || (ex.exerciseId as any)?.bodyPart || (ex as any).bodyPart || (ex as any).target || "General";
                         const color = getC(bp);
                         return (
                           <motion.div key={`${ex.exerciseId?._id}-${exIdx}`} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, height: 0 }} className="flex items-center gap-3 p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/10 transition-all">
@@ -332,7 +349,6 @@ function EditModal({ plan, onClose, onSave }: {
   );
 }
 
-// â”€â”€â”€ Delete Confirm â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function ConfirmDelete({ planName, onConfirm, onCancel, loading }: {
   planName: string; onConfirm: () => void; onCancel: () => void; loading: boolean;
 }) {
@@ -356,7 +372,6 @@ function ConfirmDelete({ planName, onConfirm, onCancel, loading }: {
   );
 }
 
-// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function WorkoutPlansPage() {
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -411,6 +426,18 @@ export default function WorkoutPlansPage() {
         setDetailPlan(null);
       }
     } catch { showToast("Failed to update plan", "error"); }
+  };
+
+  const handleViewPlan = async (id: string) => {
+    try {
+      const res = await axiosInstance.get(`/workout-plans/${id}`, { withCredentials: true });
+      console.log("-------", res)
+      if (res.data.success) {
+        setDetailPlan(res.data.data);
+      }
+    } catch {
+      showToast("Failed to fetch plan details", "error");
+    }
   };
 
   const handleSort = (field: string) => {
@@ -478,8 +505,8 @@ export default function WorkoutPlansPage() {
         {/* Table Header */}
         <div className="grid grid-cols-[2.5fr_1.8fr_90px_90px_100px_130px] gap-4 px-6 py-4 border-b border-white/[0.06] bg-white/[0.01]">
           <SortHeader field="planName" label="Plan" />
-          <SortHeader field="client"   label="Trainee" />
-          <SortHeader field="days"     label="Days" />
+          <SortHeader field="client" label="Trainee" />
+          <SortHeader field="days" label="Days" />
           <SortHeader field="exercises" label="Exercises" />
           <SortHeader field="createdAt" label="Created" />
           <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">Actions</p>
@@ -523,7 +550,7 @@ export default function WorkoutPlansPage() {
                         <span className="text-[9px] font-extrabold text-violet-300">{getInitials(plan.client?.userName || "")}</span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-white/80 truncate">{plan.client?.userName || "â€”"}</p>
+                        <p className="text-sm font-semibold text-white/80 truncate">{plan.client?.userName || "-"}</p>
                         <p className="text-[9px] text-white/30 truncate">{plan.client?.email || ""}</p>
                       </div>
                     </div>
@@ -550,7 +577,7 @@ export default function WorkoutPlansPage() {
                     {/* Actions */}
                     <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
                       <button
-                        onClick={() => setDetailPlan(plan)}
+                        onClick={() => handleViewPlan(plan._id)}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] text-white/60 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all"
                       >
                         <Eye size={11} /> View
@@ -588,7 +615,7 @@ export default function WorkoutPlansPage() {
             </p>
             {!search && (
               <Link href="/admin/workout-builder" className="text-[#c8fe1b] text-xs font-bold uppercase tracking-widest hover:underline">
-                Create your first plan â†’
+                Create your first plan →
               </Link>
             )}
           </div>
@@ -634,9 +661,8 @@ export default function WorkoutPlansPage() {
         {toast && (
           <motion.div
             initial={{ opacity: 0, y: 20, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className={`fixed bottom-6 right-6 z-[70] px-5 py-3.5 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-xl ${
-              toast.type === "success" ? "bg-[#c8fe1b]/10 border-[#c8fe1b]/30 text-[#c8fe1b]" : "bg-red-500/10 border-red-500/30 text-red-400"
-            }`}
+            className={`fixed bottom-6 right-6 z-[70] px-5 py-3.5 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-xl ${toast.type === "success" ? "bg-[#c8fe1b]/10 border-[#c8fe1b]/30 text-[#c8fe1b]" : "bg-red-500/10 border-red-500/30 text-red-400"
+              }`}
           >
             {toast.type === "success" ? <CheckCircle2 size={18} /> : <X size={18} />}
             <p className="text-sm font-bold">{toast.message}</p>

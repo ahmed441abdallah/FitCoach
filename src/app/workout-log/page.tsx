@@ -81,7 +81,8 @@ function LogModal({ open, plan, onClose, onSaved, t }: {
     setSelectedDay(day);
     setExercises(day.exercises.map(e => ({
       exerciseId: (e.exerciseId as any)?._id ?? e.exerciseId,
-      name: (e.exerciseId as any)?.name ?? "Exercise",
+      name: (e.exerciseId as any)?.name || (e as any).name || (e as any).exerciseName || "Unknown Exercise",
+      bodyPart: (e.exerciseId as any)?.bodyPart || (e as any).bodyPart || (e as any).target || "General",
       sets: Array.from({ length: e.sets }, () => ({ reps: String(e.reps), weight: "" })),
       exerciseNotes: "",
     })));

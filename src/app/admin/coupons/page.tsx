@@ -150,7 +150,7 @@ function CouponModal({ initial, onClose, onSave, loading, apiError }: {
                 className="w-full pl-9 pr-4 py-3 rounded-xl bg-white/[0.04] border border-white/[0.08] text-[#c8fe1b] text-sm placeholder:text-white/20 focus:outline-none focus:border-[#c8fe1b]/50 transition-all font-mono font-bold tracking-widest uppercase"
               />
             </div>
-            <p className="text-white/20 text-[10px] mt-1.5">Minimum 3 characters Â· automatically uppercased</p>
+            <p className="text-white/20 text-[10px] mt-1.5">Minimum 3 characters · automatically uppercased</p>
           </div>
 
           {/* Discount */}
@@ -172,7 +172,7 @@ function CouponModal({ initial, onClose, onSave, loading, apiError }: {
               <div className="absolute inset-y-0 left-0 bg-gradient-to-r from-[#c8fe1b] to-lime-400 rounded-full transition-all"
                 style={{ width: `${Math.min(form.discount, 100)}%` }} />
             </div>
-            <p className="text-white/20 text-[10px] mt-1.5">1% â€“ 100%</p>
+            <p className="text-white/20 text-[10px] mt-1.5">1% - 100%</p>
           </div>
 
           {/* Expiry Date */}

@@ -513,10 +513,10 @@ export const WorkoutPlanPDF = ({ plan }: { plan: WorkoutPlanData }) => {
                   >
                     <Text style={s.rowNo}>{exIdx + 1}</Text>
                     <Text style={s.rowName}>
-                      {ex.exerciseId?.name ?? "Unknown Exercise"}
+                      {(ex.exerciseId as any)?.name || (ex as any).name || (ex as any).exerciseName || "Unknown Exercise"}
                     </Text>
                     <Text style={s.rowPart}>
-                      {ex.exerciseId?.bodyPart ?? "General"}
+                      {(ex.exerciseId as any)?.bodyPart || (ex as any).bodyPart || (ex as any).target || "General"}
                     </Text>
                     <View style={s.statWrap}>
                       <StatBadge value={ex.sets} />

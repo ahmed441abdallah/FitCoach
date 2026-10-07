@@ -243,7 +243,7 @@ export default function DietBuilderPage() {
     } catch (e: any) {
       const msg = e.response?.data?.message || "Failed to save plan.";
       const isDuplicate = e.response?.status === 400 && msg.toLowerCase().includes("already exists");
-      setToast({ message: isDuplicate ? `âš ï¸ ${msg} â€” go to Diet Plans to edit it.` : msg, type: isDuplicate ? "warning" : "error" });
+      setToast({ message: isDuplicate ? `âš ï¸ ${msg} - go to Diet Plans to edit it.` : msg, type: isDuplicate ? "warning" : "error" });
     } finally { setIsSaving(false); }
   };
 

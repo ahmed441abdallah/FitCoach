@@ -44,11 +44,10 @@ function TraineePicker({
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all ${
-          open
-            ? "bg-[#c8fe1b]/[0.06] border-[#c8fe1b]/40 shadow-[0_0_16px_rgba(200,254,27,0.08)]"
-            : "bg-white/[0.03] border-white/[0.08] hover:border-white/20"
-        }`}
+        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-all ${open
+          ? "bg-[#c8fe1b]/[0.06] border-[#c8fe1b]/40 shadow-[0_0_16px_rgba(200,254,27,0.08)]"
+          : "bg-white/[0.03] border-white/[0.08] hover:border-white/20"
+          }`}
       >
         {selected ? (
           <>
@@ -120,23 +119,19 @@ function TraineePicker({
                     key={t._id}
                     type="button"
                     onClick={() => { onChange(t._id); setOpen(false); setSearch(""); }}
-                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.05] transition-colors text-left group ${
-                      value === t._id ? "bg-[#c8fe1b]/[0.06]" : ""
-                    }`}
+                    className={`w-full flex items-center gap-3 px-3.5 py-2.5 hover:bg-white/[0.05] transition-colors text-left group ${value === t._id ? "bg-[#c8fe1b]/[0.06]" : ""
+                      }`}
                   >
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                      value === t._id
-                        ? "bg-[#c8fe1b]/20 border border-[#c8fe1b]/30"
-                        : "bg-white/[0.05] border border-white/10 group-hover:border-white/20"
-                    }`}>
-                      <span className={`text-[10px] font-extrabold ${
-                        value === t._id ? "text-[#c8fe1b]" : "text-white/50"
-                      }`}>{getInitials(t.userName)}</span>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${value === t._id
+                      ? "bg-[#c8fe1b]/20 border border-[#c8fe1b]/30"
+                      : "bg-white/[0.05] border border-white/10 group-hover:border-white/20"
+                      }`}>
+                      <span className={`text-[10px] font-extrabold ${value === t._id ? "text-[#c8fe1b]" : "text-white/50"
+                        }`}>{getInitials(t.userName)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-bold truncate ${
-                        value === t._id ? "text-[#c8fe1b]" : "text-white"
-                      }`}>{t.userName}</p>
+                      <p className={`text-sm font-bold truncate ${value === t._id ? "text-[#c8fe1b]" : "text-white"
+                        }`}>{t.userName}</p>
                       <p className="text-[9px] text-white/35 truncate">{t.email}</p>
                     </div>
                     {value === t._id && (
@@ -198,7 +193,7 @@ export default function WorkoutBuilderPage() {
   const [notes, setNotes] = useState("");
 
   const [days, setDays] = useState<DayPlan[]>([
-    { dayName: "Day 1 â€” Full Body", exercises: [] }
+    { dayName: "Day 1 - Full Body", exercises: [] }
   ]);
 
   const [exercises, setExercises] = useState<DBExercise[]>([]);
@@ -299,14 +294,14 @@ export default function WorkoutBuilderPage() {
       }, { withCredentials: true });
       if (res.data.success) {
         setToast({ message: "Plan assigned successfully!", type: "success" });
-        setDays([{ dayName: "Day 1 â€” Full Body", exercises: [] }]);
+        setDays([{ dayName: "Day 1 - Full Body", exercises: [] }]);
         setSelectedTrainee(""); setPlanName("New Custom Plan");
         setDescription(""); setNotes("");
       }
     } catch (e: any) {
       const msg = e.response?.data?.message || "Failed to save plan.";
       const isDuplicate = e.response?.status === 400 && msg.toLowerCase().includes("already exists");
-      setToast({ message: isDuplicate ? `âš ï¸ ${msg} â€” go to Workout Plans to edit it.` : msg, type: isDuplicate ? "warning" : "error" });
+      setToast({ message: isDuplicate ? `âš ï¸ ${msg} - go to Workout Plans to edit it.` : msg, type: isDuplicate ? "warning" : "error" });
     } finally { setIsSaving(false); }
   };
 
@@ -425,11 +420,10 @@ export default function WorkoutBuilderPage() {
                 <button
                   key={part}
                   onClick={() => setBodyPartFilter(part)}
-                  className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${
-                    bodyPartFilter === part
-                      ? "bg-[#c8fe1b]/15 border-[#c8fe1b]/40 text-[#c8fe1b]"
-                      : "border-white/10 text-white/30 hover:text-white/60 hover:border-white/20"
-                  }`}
+                  className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border transition-all ${bodyPartFilter === part
+                    ? "bg-[#c8fe1b]/15 border-[#c8fe1b]/40 text-[#c8fe1b]"
+                    : "border-white/10 text-white/30 hover:text-white/60 hover:border-white/20"
+                    }`}
                 >
                   {part}
                 </button>
@@ -572,7 +566,7 @@ export default function WorkoutBuilderPage() {
                   {day.exercises.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-24 rounded-xl border border-dashed border-white/[0.08] bg-white/[0.01] text-center">
                       <Plus size={18} className="text-white/10 mb-1.5" />
-                      <p className="text-white/25 text-xs font-semibold uppercase tracking-wider">Hover an exercise â†’ click day number</p>
+                      <p className="text-white/25 text-xs font-semibold uppercase tracking-wider">Hover an exercise - click day number</p>
                     </div>
                   )}
                 </div>
@@ -602,13 +596,12 @@ export default function WorkoutBuilderPage() {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className={`fixed bottom-6 right-6 z-50 px-5 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-xl max-w-sm ${
-              toast.type === "success"
-                ? "bg-[#c8fe1b]/10 border-[#c8fe1b]/30 text-[#c8fe1b]"
-                : toast.type === "warning"
+            className={`fixed bottom-6 right-6 z-50 px-5 py-4 rounded-2xl shadow-2xl border flex items-center gap-3 backdrop-blur-xl max-w-sm ${toast.type === "success"
+              ? "bg-[#c8fe1b]/10 border-[#c8fe1b]/30 text-[#c8fe1b]"
+              : toast.type === "warning"
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
                 : "bg-red-500/10 border-red-500/30 text-red-400"
-            }`}
+              }`}
           >
             {toast.type === "success" ? (
               <CheckCircle2 size={18} className="flex-shrink-0" />

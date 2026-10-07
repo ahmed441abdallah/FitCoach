@@ -37,7 +37,7 @@ const STATUS_CONFIG = {
   cancelled: { label: "Rejected",  class: "bg-red-400/10 text-red-400 border-red-400/20"         },
   expired:   { label: "Expired",   class: "bg-white/5 text-white/30 border-white/10"             },
 };
-const fmtDate = (d?: string) => d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "â€”";
+const fmtDate = (d?: string) => d ? new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "-";
 const getInitials = (email: string) => email?.slice(0, 2).toUpperCase() || "??";
 
 // â”€â”€â”€ Proof / Detail Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -101,8 +101,8 @@ function ProofModal({ sub, onClose, onApprove, onReject, loading }: {
         {/* Details */}
         <div className="px-6 py-4 grid grid-cols-2 gap-3">
           {[
-            { icon: User,       label: "Email",     value: sub.client?.email || "â€”" },
-            { icon: Package,    label: "Package",   value: sub.package?.name || "â€”" },
+            { icon: User,       label: "Email",     value: sub.client?.email || "-" },
+            { icon: Package,    label: "Package",   value: sub.package?.name || "-" },
             { icon: CreditCard, label: "Paid",      value: `${sub.totalPrice} EGP` },
             { icon: Calendar,   label: "Submitted", value: fmtDate(sub.createdAt) },
           ].map(({ icon: Icon, label, value }) => (
@@ -120,7 +120,7 @@ function ProofModal({ sub, onClose, onApprove, onReject, loading }: {
         {sub.discountAmount > 0 && (
           <div className="mx-6 mb-3 px-3 py-2.5 rounded-xl bg-[#c8fe1b]/[0.04] border border-[#c8fe1b]/15">
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#c8fe1b]/50 mb-1">Coupon Applied: {sub.couponCode}</p>
-            <p className="text-xs text-white/50">Original: <span className="line-through">{sub.originalPrice} EGP</span> â†’ Discount: <span className="text-[#c8fe1b]">{sub.discountAmount} EGP off</span></p>
+            <p className="text-xs text-white/50">Original: <span className="line-through">{sub.originalPrice} EGP</span> → Discount: <span className="text-[#c8fe1b]">{sub.discountAmount} EGP off</span></p>
           </div>
         )}
 
@@ -269,7 +269,7 @@ export default function SubscriptionsPage() {
           <motion.div key={s.label} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}
             className={`rounded-2xl border p-5 ${s.bg}`}>
             <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1">{s.label}</p>
-            <p className={`text-3xl font-extrabold ${s.class}`}>{loading ? "â€”" : s.value}</p>
+            <p className={`text-3xl font-extrabold ${s.class}`}>{loading ? "-" : s.value}</p>
           </motion.div>
         ))}
       </div>
@@ -336,7 +336,7 @@ export default function SubscriptionsPage() {
                         <span className="text-[10px] font-extrabold text-[#c8fe1b]">{getInitials(sub.client?.email || "")}</span>
                       </div>
                       <div className="min-w-0">
-                        <p className="text-white text-sm font-bold truncate">{sub.client?.email || "â€”"}</p>
+                        <p className="text-white text-sm font-bold truncate">{sub.client?.email || "-"}</p>
                         <span className={`inline-flex text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full border mt-0.5 ${sc.class}`}>
                           {sc.label}
                         </span>
@@ -344,7 +344,7 @@ export default function SubscriptionsPage() {
                     </div>
 
                     {/* Package */}
-                    <p className="text-white/70 text-sm font-semibold truncate">{sub.package?.name || "â€”"}</p>
+                    <p className="text-white/70 text-sm font-semibold truncate">{sub.package?.name || "-"}</p>
 
                     {/* Amount */}
                     <div>
@@ -401,7 +401,7 @@ export default function SubscriptionsPage() {
 
         {/* Pagination */}
         <div className="px-6 py-3.5 border-t border-white/[0.05] flex items-center justify-between bg-white/[0.01]">
-          <p className="text-white/25 text-xs font-semibold">Page {page} of {totalPages || 1} Â· {total} total</p>
+          <p className="text-white/25 text-xs font-semibold">Page {page} of {totalPages || 1} · {total} total</p>
           <div className="flex gap-1 items-center">
             <button disabled={page <= 1} onClick={() => setPage(p => p - 1)}
               className="w-7 h-7 rounded-lg flex items-center justify-center text-white/30 hover:text-white hover:bg-white/[0.05] transition-all disabled:opacity-30 disabled:cursor-not-allowed">

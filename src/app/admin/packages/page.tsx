@@ -25,7 +25,6 @@ import {
   ChevronUp,
 } from "lucide-react";
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 interface PricingOption {
   _id?: string;
   durationInMonths: number;
@@ -48,13 +47,13 @@ const emptyForm = () => ({
 
 const TIER_COLORS: Record<string, string> = {
   Starter: "from-sky-900/40 to-sky-950/80 border-sky-500/20",
-  Core:    "from-violet-900/40 to-violet-950/80 border-violet-500/20",
-  Pro:     "from-[#c8fe1b]/5 to-background/80 border-[#c8fe1b]/20",
+  Core: "from-violet-900/40 to-violet-950/80 border-violet-500/20",
+  Pro: "from-[#c8fe1b]/5 to-background/80 border-[#c8fe1b]/20",
 };
 const BADGE_COLORS: Record<string, string> = {
   Starter: "bg-sky-500/10 text-sky-300 border-sky-500/20",
-  Core:    "bg-violet-500/10 text-violet-300 border-violet-500/20",
-  Pro:     "bg-[#c8fe1b]/10 text-[#c8fe1b] border-[#c8fe1b]/20",
+  Core: "bg-violet-500/10 text-violet-300 border-violet-500/20",
+  Pro: "bg-[#c8fe1b]/10 text-[#c8fe1b] border-[#c8fe1b]/20",
 };
 
 // â”€â”€â”€ Confirm Delete Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -287,7 +286,7 @@ function PackageCard({ pkg, onEdit, onDelete }: {
 }) {
   const [expanded, setExpanded] = useState(false);
   const gradient = TIER_COLORS[pkg.name] || "from-muted/60 to-card/80 border-white/10";
-  const badge    = BADGE_COLORS[pkg.name] || "bg-white/10 text-white/60 border-white/10";
+  const badge = BADGE_COLORS[pkg.name] || "bg-white/10 text-white/60 border-white/10";
   const lowestPrice = Math.min(...pkg.pricingOptions.map((o) => o.price));
 
   return (
@@ -332,7 +331,7 @@ function PackageCard({ pkg, onEdit, onDelete }: {
             <div key={opt._id || opt.durationInMonths} className="flex items-center gap-1.5 bg-white/[0.05] border border-white/[0.08] rounded-lg px-2.5 py-1.5">
               <Clock size={10} className="text-white/30" />
               <span className="text-white text-xs font-bold">{opt.durationInMonths}mo</span>
-              <span className="text-white/30 text-[10px]">â€”</span>
+              <span className="text-white/30 text-[10px]">-</span>
               <DollarSign size={9} className="text-[#c8fe1b]" />
               <span className="text-[#c8fe1b] text-xs font-extrabold">{opt.price}</span>
             </div>
@@ -363,7 +362,7 @@ function PackageCard({ pkg, onEdit, onDelete }: {
             <div className="px-5 pb-5 border-t border-white/[0.06] pt-4 space-y-2">
               {pkg.description.map((d, i) => (
                 <div key={i} className="flex items-start gap-2.5">
-                  <span className="text-[#c8fe1b] text-xs flex-shrink-0 mt-0.5">âœ“</span>
+                  <span className="text-[#c8fe1b] text-xs flex-shrink-0 mt-0.5"> -</span>
                   <p className="text-white/60 text-xs font-normal normal-case tracking-normal leading-snug">{d}</p>
                 </div>
               ))}
@@ -377,15 +376,15 @@ function PackageCard({ pkg, onEdit, onDelete }: {
 
 // â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AdminPackagesPage() {
-  const dispatch   = useAppDispatch();
+  const dispatch = useAppDispatch();
   const { packages, loading } = useAppSelector((s) => s.package);
 
-  const [showCreate, setShowCreate]     = useState(false);
-  const [editTarget, setEditTarget]     = useState<Package | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [editTarget, setEditTarget] = useState<Package | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Package | null>(null);
-  const [saving, setSaving]             = useState(false);
-  const [deleting, setDeleting]         = useState(false);
-  const [toast, setToast]               = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => { dispatch(getPackages()); }, [dispatch]);
 

@@ -44,7 +44,18 @@ function mapToPlan(pkg: any, isFeatured: boolean, selectedDuration: number, t: a
 }
 
 // ─── Plan Card ────────────────────────────────────────────────────────────────
-function PlanCard({ plan, index, t }: { plan: Plan; index: number; t: any }) {
+function PlanCard({ plan, index, t, user }: { plan: Plan; index: number; t: any; user: any }) {
+  const checkoutUrl = `/checkout?packageId=${plan._id}&optionId=${plan.pricingOptionId}`;
+  const href = user 
+    ? checkoutUrl 
+    : `/login?redirect=${encodeURIComponent(checkoutUrl)}`;
+
+  const handleClick = () => {
+    if (!user) {
+      sessionStorage.setItem("pendingCheckoutPlan", JSON.stringify({ packageId: plan._id, optionId: plan.pricingOptionId }));
+    }
+  };
+
   return (
     <motion.div
       layout
@@ -94,7 +105,8 @@ function PlanCard({ plan, index, t }: { plan: Plan; index: number; t: any }) {
 
       {/* CTA */}
       <TransitionLink
-        href={`/checkout?packageId=${plan._id}&optionId=${plan.pricingOptionId}`}
+        href={href}
+        onClick={handleClick}
         className={`w-full text-center flex items-center justify-center rounded-xl py-3 text-sm font-bold uppercase tracking-widest mb-8 transition-all duration-200 ${plan.featured
           ? "bg-black text-primary hover:bg-black/80"
           : "bg-primary text-black hover:opacity-90"
@@ -149,6 +161,7 @@ export default function CoachingPlans() {
   const t = useTranslations("home.plans");
   const dispatch = useAppDispatch();
   const { packages, loading, error } = useAppSelector((state) => state.package);
+  const { user } = useAppSelector((state) => state.auth);
 
   // State for duration toggle (defaults to 1 month, will update when data loads)
   const [selectedDuration, setSelectedDuration] = useState<number>(1);
@@ -276,7 +289,7 @@ export default function CoachingPlans() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 items-start">
             <AnimatePresence mode="wait">
               {displayPlans.map((plan, index) => (
-                <PlanCard key={plan._id ?? plan.name} plan={plan} index={index} t={t} />
+                <PlanCard key={plan._id ?? plan.name} plan={plan} index={index} t={t} user={user} />
               ))}
             </AnimatePresence>
           </div>

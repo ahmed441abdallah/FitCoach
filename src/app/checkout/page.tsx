@@ -39,6 +39,9 @@ function CheckoutContent() {
       router.push("/login");
       return;
     }
+    // Clear pending plan fallback since we have successfully reached checkout
+    sessionStorage.removeItem("pendingCheckoutPlan");
+
     axiosInstance.get("/clients/me").catch(() => {
       router.push("/get-started");
     });

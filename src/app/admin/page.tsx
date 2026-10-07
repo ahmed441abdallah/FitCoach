@@ -196,7 +196,7 @@ export default function AdminOverviewPage() {
                       {isApproved ? "Subscription approved for" : "New request from"} {item.client?.userName || "Unknown"}
                     </p>
                     <p className="text-white/35 text-[10px] mt-0.5 truncate">
-                      {item.package?.name || "Unknown"} Plan Â· {item.durationInMonths} months Â· {item.totalPrice} EGP
+                      {item.package?.name || "Unknown"} Plan · {item.durationInMonths} months · {item.totalPrice} EGP
                     </p>
                   </div>
                   <p className="text-white/25 text-[10px] flex-shrink-0 mt-0.5">

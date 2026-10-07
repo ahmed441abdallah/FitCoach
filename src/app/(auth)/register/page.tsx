@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useId, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { TransitionLink } from "@/components/layout/TransitionLink";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { register, reset } from "@/lib/features/auth/authSlice";
@@ -137,7 +137,7 @@ function FloatingInput({
             "pointer-events-none absolute top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right",
             Icon ? "start-10" : "start-4",
             floated
-              ? "top-3.5 translate-y-0 scale-[0.78] text-xs start-4"
+              ? "top-3.5 translate-y-0 scale-[0.78] text-xs"
               : "scale-100",
             focused
               ? "text-primary"
@@ -232,7 +232,7 @@ function FloatingPasswordInput({
         <label
           htmlFor={id}
           className={cn(
-            "pointer-events-none absolute start-4 top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right",
+            "pointer-events-none absolute top-1/2 -translate-y-1/2 text-sm font-medium transition-all duration-300 origin-top-left rtl:origin-top-right start-10",
             floated ? "top-3.5 translate-y-0 scale-[0.78] text-xs" : "scale-100",
             focused ? "text-primary" : error ? "text-destructive" : "text-foreground/50"
           )}
@@ -481,8 +481,9 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false);
   const [step, setStep] = useState(0); // 0 = personal info, 1 = password & terms
   const uid = useId();
-  
+
   const router = useRouter();
+  const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const { user, isLoading, isError, isSuccess, message } = useAppSelector((state) => state.auth);
 
@@ -494,7 +495,21 @@ export default function RegisterPage() {
     if (isSuccess || user) {
       setSuccess(true);
       const timer = setTimeout(() => {
-        if (user?.role === 'admin') {
+        const redirect = searchParams.get('redirect');
+        let sessionRedirect = null;
+        try {
+          const pending = sessionStorage.getItem("pendingCheckoutPlan");
+          if (pending) {
+            const { packageId, optionId } = JSON.parse(pending);
+            sessionRedirect = `/checkout?packageId=${packageId}&optionId=${optionId}`;
+          }
+        } catch (e) { }
+
+        if (redirect) {
+          router.push(redirect);
+        } else if (sessionRedirect) {
+          router.push(sessionRedirect);
+        } else if (user?.role === 'admin') {
           router.push('/admin');
         } else {
           router.push('/get-started');
@@ -504,7 +519,7 @@ export default function RegisterPage() {
     }
 
     dispatch(reset());
-  }, [user, isError, isSuccess, message, router, dispatch]);
+  }, [user, isError, isSuccess, message, router, dispatch, searchParams]);
 
   const set = useCallback(
     (key: keyof RegisterForm) =>

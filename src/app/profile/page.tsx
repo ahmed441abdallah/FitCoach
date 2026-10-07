@@ -541,16 +541,16 @@ export default function ProfilePage() {
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-bold text-white truncate">
-                                    {ex.exerciseId?.name ?? t("unknownExercise")}
+                                    {(ex.exerciseId as any)?.name || (ex as any).name || (ex as any).exerciseName || t("unknownExercise")}
                                   </p>
                                   <p className="text-[10px] text-white/35 capitalize font-semibold">
-                                    {ex.exerciseId?.bodyPart ?? t("general")}
+                                    {(ex.exerciseId as any)?.bodyPart || (ex as any).bodyPart || (ex as any).target || t("general")}
                                   </p>
                                 </div>
                                 {/* Stats */}
                                 <div className="text-right flex-shrink-0">
                                   <p className="text-xs font-extrabold text-primary">
-                                    {ex.sets} <span className="text-white/30 font-normal">×</span> {ex.reps}
+                                    {ex.sets} <span className="text-white/30 font-normal">x</span> {ex.reps}
                                   </p>
                                   {ex.restTimeMinutes > 0 && (
                                     <p className="text-[9px] text-white/30 font-semibold mt-0.5">{ex.restTimeMinutes}m {t("rest")}</p>
