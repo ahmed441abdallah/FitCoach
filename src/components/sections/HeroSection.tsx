@@ -218,8 +218,8 @@ export default function HeroSection() {
           </TransitionLink>
 
           {/* Secondary */}
-          <TransitionLink
-            href="/#coaching-plans"
+          <a
+            href="#plans"
             className="group relative inline-flex items-center justify-center gap-3
               h-[3.75rem] px-10 rounded-full
               text-[0.78rem] font-extrabold uppercase tracking-[0.2em] text-white
@@ -233,13 +233,10 @@ export default function HeroSection() {
             }}
             data-h-btn-secondary
           >
-
             <span className="relative z-10 whitespace-nowrap">
               {t("ctaSecondary")}
             </span>
-
-
-          </TransitionLink>
+          </a>
         </div>
       </div>
 

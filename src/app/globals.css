@@ -126,7 +126,7 @@
   html {
     @apply font-sans;
     font-family: var(--font-barlow-condensed), system-ui, sans-serif;
-    /* NOTE: no scroll-behavior:smooth — Lenis handles this */
+    scroll-behavior: smooth;
   }
 
   /* Switch to Tajawal for Arabic and globally prevent letter-spacing which breaks glyph joining */
@@ -171,12 +171,12 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.72 0.21 48 / 40%);
+    background: rgba(200, 255, 0, 0.4); /* Primary color with opacity */
     border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.72 0.21 48 / 70%);
+    background: rgba(200, 255, 0, 0.8); /* Primary color more opaque on hover */
   }
 
   /* NOTE: removed `img { content-visibility: auto }` — without contain-intrinsic-size

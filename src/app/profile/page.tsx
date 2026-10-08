@@ -137,7 +137,11 @@ export default function ProfilePage() {
     fetchData();
   }, [user, router]);
 
-  const handleLogout = () => { dispatch(logout()); dispatch(reset()); router.push("/"); };
+  const handleLogout = async () => {
+    await dispatch(logout());
+    dispatch(reset());
+    router.push("/");
+  };
 
   if (!mounted || !user) return null;
 
@@ -160,8 +164,8 @@ export default function ProfilePage() {
     <main className="min-h-screen text-foreground" style={{ background: "#0a0a0a" }}>
       <Navbar />
 
-      {/* ── Page Header — matches Exercises / Calories style ─── */}
-      <section className="relative overflow-hidden py-24 px-6 border-b border-foreground/[0.06]">
+      {/* ── Page Header ─── */}
+      <section className="relative overflow-hidden py-12 md:py-24 px-4 sm:px-6 border-b border-foreground/[0.06]">
         {/* Beams Background */}
         <div className="absolute inset-0 z-0 opacity-50 pointer-events-none">
           <Beams
@@ -181,7 +185,7 @@ export default function ProfilePage() {
         <div className="relative z-10 max-w-6xl mx-auto">
           <TransitionLink
             href="/"
-            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-primary transition-colors mb-10 group"
+            className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/50 hover:text-primary transition-colors mb-6 md:mb-10 group"
           >
             <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" />
             Back to Home
@@ -191,40 +195,38 @@ export default function ProfilePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            className="flex flex-col md:flex-row md:items-end justify-between gap-8"
+            className="flex flex-col md:flex-row md:items-end justify-between gap-5 md:gap-8"
           >
-            {/* Left — icon + text */}
-            <div className="flex items-start gap-5">
-              {/* Avatar / Icon Badge */}
-              <div className="relative flex-shrink-0 mt-1">
-                <div className="w-16 h-16 rounded-full border border-primary/20 bg-primary/5 flex items-center justify-center text-primary">
-                  <User size={24} className="text-primary" />
+            {/* Avatar + Text + Actions (mobile: stacked; desktop: side-by-side) */}
+            <div className="flex items-start gap-4">
+              {/* Avatar */}
+              <div className="relative flex-shrink-0">
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full border border-primary/20 bg-primary/5 flex items-center justify-center text-primary">
+                  <User size={22} className="text-primary" />
                 </div>
-                {/* Online dot */}
-                <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-primary border-2 shadow-[0_0_8px_rgba(200,255,0,0.8)]" style={{ borderColor: "#090909" }} />
+                <span className="absolute bottom-0.5 right-0.5 w-3 h-3 md:w-3.5 md:h-3.5 rounded-full bg-primary border-2 shadow-[0_0_8px_rgba(200,255,0,0.8)]" style={{ borderColor: "#090909" }} />
               </div>
 
-              {/* Text Content */}
-              <div>
-                <p className="text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-2 flex items-center gap-2">
-                  <span className="inline-block w-5 h-px bg-primary" />
+              {/* Name + info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-primary font-bold text-[9px] md:text-[10px] uppercase tracking-[0.3em] mb-1 flex items-center gap-2">
+                  <span className="inline-block w-4 h-px bg-primary" />
                   {t("title")}
                 </p>
-                <h1 className="text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-foreground leading-none drop-shadow-xl mb-3">
+                <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold uppercase tracking-tight text-foreground leading-none drop-shadow-xl mb-2 truncate">
                   {user.userName}
                 </h1>
-                <div className="flex flex-wrap items-center gap-3 text-sm text-foreground/50">
-                  <span className="flex items-center gap-1.5"><Mail size={13} /> {user.email}</span>
+                <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-foreground/50">
+                  <span className="flex items-center gap-1.5 truncate max-w-[180px] sm:max-w-none"><Mail size={11} /> {user.email}</span>
                   {clientProfile && (
                     <>
-                      <span className="w-1 h-1 rounded-full bg-foreground/20" />
-                      <span className="flex items-center gap-1.5">
-                        <Target size={13} className="text-primary/70" />
+                      <span className="hidden sm:inline w-1 h-1 rounded-full bg-foreground/20" />
+                      <span className="hidden sm:flex items-center gap-1.5">
+                        <Target size={11} className="text-primary/70" />
                         {clientProfile.goals}
                       </span>
-                      <span className="w-1 h-1 rounded-full bg-foreground/20" />
-                      <span className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-bold uppercase tracking-wider", experienceColor)}>
-                        <Flame size={10} /> {clientProfile.experienceLevel}
+                      <span className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase tracking-wider", experienceColor)}>
+                        <Flame size={9} /> {clientProfile.experienceLevel}
                       </span>
                     </>
                   )}
@@ -233,17 +235,17 @@ export default function ProfilePage() {
             </div>
 
             {/* Right — action + member badge */}
-            <div className="flex items-center gap-3 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-shrink-0">
               {activeSub && (
-                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">
-                  <Zap size={11} fill="currentColor" /> {t("proMember")}
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/15 border border-primary/30 text-primary text-[10px] font-bold uppercase tracking-widest">
+                  <Zap size={10} fill="currentColor" /> {t("proMember")}
                 </span>
               )}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-foreground/10 text-foreground/50 hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/5 transition-all duration-200 font-bold uppercase tracking-wider text-sm"
+                className="flex items-center gap-1.5 px-3 py-2 md:px-5 md:py-2.5 rounded-xl border border-foreground/10 text-foreground/50 hover:text-red-400 hover:border-red-400/30 hover:bg-red-400/5 transition-all duration-200 font-bold uppercase tracking-wider text-xs md:text-sm"
               >
-                <LogOut size={15} /> {t("signOut")}
+                <LogOut size={13} /> <span className="hidden sm:inline">{t("signOut")}</span><span className="sm:hidden">Out</span>
               </button>
             </div>
           </motion.div>
@@ -254,7 +256,7 @@ export default function ProfilePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15, duration: 0.5 }}
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8"
+              className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3 mt-5 md:mt-8"
             >
               {[
                 { label: t("height"), value: clientProfile.height, icon: Activity },
@@ -265,52 +267,54 @@ export default function ProfilePage() {
                 <div
                   key={label}
                   className={cn(
-                    "relative overflow-hidden rounded-2xl border p-4",
+                    "relative overflow-hidden rounded-2xl border p-3 md:p-4",
                     highlight
                       ? "bg-primary/10 border-primary/30"
                       : "bg-foreground/[0.03] border-foreground/[0.07]"
                   )}
                 >
-                  <span className={cn("text-[10px] font-bold uppercase tracking-widest mb-1 block", highlight ? "text-primary/80" : "text-foreground/40")}>{label}</span>
-                  <span className={cn("text-xl font-extrabold", highlight ? "text-primary" : "text-foreground")}>{value}</span>
-                  <Icon size={28} className={cn("absolute right-3 bottom-3 opacity-10", highlight ? "text-primary" : "text-foreground")} />
+                  <span className={cn("text-[9px] md:text-[10px] font-bold uppercase tracking-widest mb-1 block", highlight ? "text-primary/80" : "text-foreground/40")}>{label}</span>
+                  <span className={cn("text-lg md:text-xl font-extrabold", highlight ? "text-primary" : "text-foreground")}>{value}</span>
+                  <Icon size={22} className={cn("absolute right-2 bottom-2 opacity-10", highlight ? "text-primary" : "text-foreground")} />
                 </div>
               ))}
             </motion.div>
           )}
 
-          {/* Tabs */}
+          {/* Tabs — scrollable horizontally on mobile */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
-            className="flex gap-1 mt-8 border-b border-foreground/[0.07]"
+            className="mt-5 md:mt-8 border-b border-foreground/[0.07]"
           >
-            {tabs.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={cn(
-                  "relative flex items-center gap-2 px-5 py-3 text-sm font-bold uppercase tracking-widest transition-colors duration-200",
-                  activeTab === id ? "text-primary" : "text-foreground/40 hover:text-foreground/70"
-                )}
-              >
-                <Icon size={14} />
-                {label}
-                {activeTab === id && (
-                  <motion.div
-                    layoutId="tab-underline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(200,255,0,0.7)]"
-                  />
-                )}
-              </button>
-            ))}
+            <div className="flex gap-0 overflow-x-auto scrollbar-hide -mb-px">
+              {tabs.map(({ id, label, icon: Icon }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveTab(id)}
+                  className={cn(
+                    "relative flex items-center gap-1.5 px-3 sm:px-5 py-3 text-[11px] sm:text-sm font-bold uppercase tracking-widest transition-colors duration-200 whitespace-nowrap flex-shrink-0",
+                    activeTab === id ? "text-primary" : "text-foreground/40 hover:text-foreground/70"
+                  )}
+                >
+                  <Icon size={13} />
+                  {label}
+                  {activeTab === id && (
+                    <motion.div
+                      layoutId="tab-underline"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(200,255,0,0.7)]"
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
           </motion.div>
         </div>
       </section>
 
       {/* ── Tab Content ───────────────────────────────────────────── */}
-      <div className="max-w-6xl mx-auto px-6 py-10">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 py-6 md:py-10">
         <AnimatePresence mode="wait">
 
           {/* Overview Tab */}
@@ -321,7 +325,7 @@ export default function ProfilePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}
-              className="grid md:grid-cols-2 gap-6"
+              className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"
             >
               {/* Body Profile */}
               {clientProfile ? (
@@ -456,7 +460,7 @@ export default function ProfilePage() {
                   <div className="rounded-3xl border border-white/[0.07] p-6 relative overflow-hidden" style={{ background: "#111111" }}>
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(200,254,27,0.04)" }} />
                     <div className="relative">
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                      <div className="flex flex-col gap-4 mb-4">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary mb-1 flex items-center gap-2">
                             <span className="w-4 h-px bg-primary" /> {t("workoutPlan")}
@@ -468,14 +472,14 @@ export default function ProfilePage() {
                             <p className="text-sm text-white/60 mt-2 leading-relaxed">{workoutPlan.description}</p>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <div className="flex flex-col items-center px-4 py-3 rounded-2xl border border-white/[0.07]" style={{ background: "rgba(200,254,27,0.06)" }}>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t("days")}</span>
-                            <span className="text-2xl font-extrabold text-primary">{workoutPlan.days.length}</span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex flex-col items-center px-3 py-2.5 rounded-2xl border border-white/[0.07]" style={{ background: "rgba(200,254,27,0.06)" }}>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-1">{t("days")}</span>
+                            <span className="text-xl font-extrabold text-primary">{workoutPlan.days.length}</span>
                           </div>
-                          <div className="flex flex-col items-center px-4 py-3 rounded-2xl border border-white/[0.07]" style={{ background: "rgba(255,255,255,0.02)" }}>
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-1">{t("exercises")}</span>
-                            <span className="text-2xl font-extrabold text-white">
+                          <div className="flex flex-col items-center px-3 py-2.5 rounded-2xl border border-white/[0.07]" style={{ background: "rgba(255,255,255,0.02)" }}>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-white/40 mb-1">{t("exercises")}</span>
+                            <span className="text-xl font-extrabold text-white">
                               {workoutPlan.days.reduce((t, d) => t + d.exercises.length, 0)}
                             </span>
                           </div>
@@ -504,7 +508,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Day Cards */}
-                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 md:gap-4">
                     {workoutPlan.days.map((day, idx) => (
                       <motion.div
                         key={day._id || idx}
@@ -594,7 +598,7 @@ export default function ProfilePage() {
                   <div className="rounded-3xl border border-white/[0.07] p-6 relative overflow-hidden" style={{ background: "#111111" }}>
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(52,211,153,0.04)" }} />
                     <div className="relative">
-                      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+                      <div className="flex flex-col gap-4 mb-5">
                         <div>
                           <p className="text-[10px] font-bold uppercase tracking-[0.3em] mb-1 flex items-center gap-2" style={{ color: "#34d399" }}>
                             <span className="w-4 h-px" style={{ background: "#34d399" }} /> {t("nutritionPlan")}
@@ -612,7 +616,7 @@ export default function ProfilePage() {
                       </div>
 
                       {/* Calorie + Macro strip */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 md:gap-3">
                         {[
                           { label: t("totalCalories"), value: dietPlan.totalCalories, unit: t("kcal"), color: "#c8fe1b", glow: "rgba(200,254,27,0.08)" },
                           { label: t("protein"), value: dietPlan.macros?.protein, unit: t("g"), color: "#34d399", glow: "rgba(52,211,153,0.08)" },
@@ -657,7 +661,7 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Meal Cards */}
-                  <div className="grid md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     {dietPlan.meals.map((meal, idx) => (
                       <motion.div
                         key={meal._id || idx}
@@ -780,7 +784,7 @@ export default function ProfilePage() {
                         sub.status === "pending" ? "bg-amber-400" : "bg-red-500"
                       )} />
 
-                      <div className="pl-5 pr-6 py-5 flex flex-col sm:flex-row sm:items-center gap-5">
+                      <div className="pl-4 pr-4 sm:pl-5 sm:pr-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
                         {/* Icon */}
                         <div className={cn(
                           "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
@@ -815,7 +819,7 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Stats */}
-                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                        <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm">
                           <div className="flex flex-col">
                             <span className="text-[10px] uppercase tracking-widest text-white/35 font-semibold">{t("duration")}</span>
                             <span className="font-bold text-white">{t("durationMonths", { duration: sub.durationInMonths })}</span>
@@ -861,7 +865,7 @@ export default function ProfilePage() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                   {clientProfile.images.map((img, idx) => (
                     <motion.div
                       key={idx}

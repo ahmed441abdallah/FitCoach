@@ -15,6 +15,7 @@ import { useAppSelector } from "@/lib/hooks";
 import NotificationBell from "@/components/layout/NotificationBell";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useTranslations } from "next-intl";
+import axiosInstance from "@/lib/axios";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -24,18 +25,26 @@ export default function Navbar() {
   const tc = useTranslations("common");
 
   const [mounted, setMounted] = useState(false);
+  const [hasActiveSub, setHasActiveSub] = useState(false);
+
   useEffect(() => setMounted(true), []);
 
-  const navLinks = [
-    { href: "/exercises", label: t("exercises") },
-    { href: "/calories", label: t("calories") },
-  ];
-
-  const authLinks = [
-    { href: "/progress", label: t("progress") },
-    { href: "/workout-log", label: t("workoutLog") },
-    { href: "/chat", label: t("chat") },
-  ];
+  // Fetch subscription status whenever user changes
+  useEffect(() => {
+    if (!user || user.role === "admin") {
+      setHasActiveSub(false);
+      return;
+    }
+    axiosInstance
+      .get("/subscriptions/me", { withCredentials: true })
+      .then((res) => {
+        if (res.data.success) {
+          const subs: { status: string }[] = res.data.data;
+          setHasActiveSub(subs.some((s) => s.status === "active"));
+        }
+      })
+      .catch(() => setHasActiveSub(false));
+  }, [user]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-foreground/[0.06] hidden md:block">
@@ -70,8 +79,8 @@ export default function Navbar() {
           {mounted ? (
             user ? (
               <div className="flex items-center gap-4">
-                {/* Authenticated Links in a Glass Pill */}
-                {user.role !== 'admin' && (
+                {/* Authenticated Links in a Glass Pill — only for subscribed users */}
+                {hasActiveSub && (
                   <div className="hidden lg:flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/[0.05]">
                     <button
                       onClick={() => navigate("/progress")}
@@ -94,8 +103,8 @@ export default function Navbar() {
                   </div>
                 )}
 
-                {/* Notification Bell */}
-                {user.role !== 'admin' && (
+                {/* Notification Bell — subscribed users only */}
+                {hasActiveSub && (
                   <div className="flex-shrink-0">
                     <NotificationBell />
                   </div>
@@ -134,7 +143,7 @@ export default function Navbar() {
 
         {/* Mobile hamburger — triggers Sheet */}
         <div className="md:hidden flex items-center gap-2">
-          {mounted && user && user.role !== 'admin' && <NotificationBell />}
+          {mounted && user && hasActiveSub && <NotificationBell />}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger
               id="mobile-menu-trigger"
@@ -170,7 +179,8 @@ export default function Navbar() {
                 >
                   {t("calories")}
                 </button>
-                {mounted && user && user.role !== 'admin' && (
+                {/* Mobile: Workout Log & Progress — subscribed users only */}
+                {mounted && hasActiveSub && (
                   <>
                     <button onClick={() => { setOpen(false); navigate("/progress"); }} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest text-emerald-400 hover:bg-emerald-500/5 transition-all duration-200 text-left">
                       {t("progress")}
