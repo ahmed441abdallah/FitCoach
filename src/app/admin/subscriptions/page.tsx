@@ -144,10 +144,19 @@ function ProofModal({ sub, onClose, onApprove, onReject, loading }: {
           </div>
         )}
         {sub.status !== "pending" && (
-          <div className="px-6 pb-6">
+          <div className="px-6 pb-6 flex flex-col gap-3">
             <div className={`py-3 rounded-xl text-center text-sm font-bold uppercase tracking-wider border ${sc.class}`}>
               This subscription is {sc.label}
             </div>
+            {sub.status === "active" && (
+              <button
+                onClick={() => onReject(sub._id)}
+                disabled={loading}
+                className="flex items-center justify-center gap-2 py-3 rounded-xl bg-red-600/10 border border-red-600/30 text-red-400 font-bold uppercase tracking-wider text-sm hover:bg-red-600/20 transition-all disabled:opacity-50"
+              >
+                {loading ? <Loader2 size={14} className="animate-spin" /> : <XCircle size={16} />} Revoke &amp; Cancel Subscription
+              </button>
+            )}
           </div>
         )}
       </motion.div>
@@ -379,10 +388,15 @@ export default function SubscriptionsPage() {
                         </>
                       )}
                       {sub.status === "active" && (
-                        <button onClick={() => handleDownloadInvoice(sub._id)} title="Download Invoice"
-                          className="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] flex items-center justify-center text-white/40 hover:text-white transition-all">
-                          <FileDown size={12} />
-                        </button>
+                        <>
+                          <button onClick={() => handleDownloadInvoice(sub._id)} title="Download Invoice"
+                            className="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] flex items-center justify-center text-white/40 hover:text-white transition-all">
+                            <FileDown size={12} />
+                          </button>
+                          <button onClick={() => handleReject(sub._id)} title="Revoke & Cancel" className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center text-red-400 transition-all">
+                            <XCircle size={13} />
+                          </button>
+                        </>
                       )}
                     </div>
                   </motion.div>

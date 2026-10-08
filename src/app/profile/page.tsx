@@ -10,7 +10,7 @@ import {
   User, Mail, LogOut, Package as PackageIcon, Calendar,
   CreditCard, ShieldCheck, Clock, CheckCircle2, XCircle,
   Target, Activity, Dumbbell, Apple, Image as ImageIcon,
-  ChevronRight, TrendingUp, Zap, ArrowUpRight, Flame, ArrowLeft
+  ChevronRight, TrendingUp, Zap, ArrowUpRight, Flame, ArrowLeft, BatteryCharging
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/layout/Navbar";
@@ -65,7 +65,7 @@ interface WorkoutPlan {
     dayName: string;
     exercises: {
       _id: string;
-      exerciseId: { _id: string; name: string; bodyPart: string } | null;
+      exerciseId: { _id: string; name: string; bodyPart: string; gifUrl?: string; instructions?: string[]; target?: string; equipment?: string; } | null;
       sets: number;
       reps: number;
       restTimeMinutes: number;
@@ -110,6 +110,33 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [selectedExercise, setSelectedExercise] = useState<any>(null);
+
+  const handleExerciseClick = async (ex: any) => {
+    setSelectedExercise(ex);
+    
+    const exerciseId = typeof ex.exerciseId === 'object' && ex.exerciseId !== null ? ex.exerciseId._id : ex.exerciseId;
+    
+    if (exerciseId) {
+      try {
+        const res = await axiosInstance.get(`/exercises/${exerciseId}`, { withCredentials: true });
+        if (res.data.success) {
+          setSelectedExercise((prev: any) => {
+            if (!prev) return prev;
+            return {
+              ...prev,
+              exerciseId: {
+                ...(typeof prev.exerciseId === 'object' ? prev.exerciseId : {}),
+                ...res.data.data
+              }
+            };
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch exercise details", err);
+      }
+    }
+  };
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -159,7 +186,7 @@ export default function ProfilePage() {
     Intermediate: "text-amber-400 bg-amber-400/10 border-amber-400/20",
     Advanced: "text-red-400 bg-red-400/10 border-red-400/20",
   }[clientProfile?.experienceLevel ?? ""] ?? "text-primary bg-primary/10 border-primary/20";
-
+  console.log("---------", selectedExercise);
   return (
     <main className="min-h-screen text-foreground" style={{ background: "#0a0a0a" }}>
       <Navbar />
@@ -519,25 +546,35 @@ export default function ProfilePage() {
                         style={{ background: "#111111" }}
                       >
                         {/* Day header */}
-                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]" style={{ background: "rgba(200,254,27,0.04)" }}>
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]" style={{ background: (!day.exercises || day.exercises.length === 0) ? "rgba(255,255,255,0.02)" : "rgba(200,254,27,0.04)" }}>
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-black" style={{ background: "#c8fe1b" }}>
+                            <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-extrabold text-black" style={{ background: (!day.exercises || day.exercises.length === 0) ? "#444" : "#c8fe1b", color: (!day.exercises || day.exercises.length === 0) ? "#fff" : "#000" }}>
                               {idx + 1}
                             </div>
                             <h3 className="text-sm font-extrabold text-white uppercase tracking-wider">{day.dayName}</h3>
                           </div>
-                          <span className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-primary/20 text-primary" style={{ background: "rgba(200,254,27,0.08)" }}>
-                            {day.exercises.length} {t("ex")}
-                          </span>
+                          {(!day.exercises || day.exercises.length === 0) ? (
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-white/10 text-white/50" style={{ background: "rgba(255,255,255,0.05)" }}>
+                              {t("restDay") || "REST"}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-primary/20 text-primary" style={{ background: "rgba(200,254,27,0.08)" }}>
+                              {day.exercises.length} {t("ex")}
+                            </span>
+                          )}
                         </div>
 
                         {/* Exercise list */}
-                        <div className="p-4 space-y-2.5 flex-1">
-                          {day.exercises.length === 0 ? (
-                            <p className="text-center text-xs text-white/30 py-6">{t("restDay")}</p>
+                        <div className="p-4 space-y-2.5 flex-1 flex flex-col">
+                          {(!day.exercises || day.exercises.length === 0) ? (
+                            <div className="flex flex-col items-center justify-center flex-1 py-10 opacity-50">
+                              <BatteryCharging size={32} className="text-white/40 mb-3" />
+                              <p className="text-center text-sm font-bold tracking-widest text-white/50 uppercase">{t("restDay") || "Rest Day"}</p>
+                              <p className="text-center text-[10px] text-white/30 mt-1">Take time to recover</p>
+                            </div>
                           ) : (
                             day.exercises.map((ex, exIdx) => (
-                              <div key={ex._id || exIdx} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.05] hover:border-primary/20 transition-all group" style={{ background: "rgba(255,255,255,0.02)" }}>
+                              <div key={ex._id || exIdx} onClick={() => handleExerciseClick(ex)} className="flex items-center gap-3 p-3 rounded-xl border border-white/[0.05] hover:border-primary/20 transition-all group cursor-pointer" style={{ background: "rgba(255,255,255,0.02)" }}>
                                 {/* Number */}
                                 <div className="w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-extrabold flex-shrink-0" style={{ background: "rgba(200,254,27,0.08)", color: "#c8fe1b" }}>
                                   {exIdx + 1}
@@ -607,7 +644,7 @@ export default function ProfilePage() {
                             <p className="text-sm text-white/60 leading-relaxed">{dietPlan.description}</p>
                           )}
                         </div>
-                        <DownloadDietBtn 
+                        <DownloadDietBtn
                           plan={{
                             ...dietPlan,
                             clientName: user?.userName,
@@ -642,12 +679,12 @@ export default function ProfilePage() {
                         return (
                           <div className="mt-4">
                             <div className="flex overflow-hidden rounded-full h-2">
-                              <div className="h-full transition-all" style={{ width: `${(p/total)*100}%`, background: "#34d399" }} />
-                              <div className="h-full transition-all" style={{ width: `${(c/total)*100}%`, background: "#f97316" }} />
-                              <div className="h-full transition-all" style={{ width: `${(f/total)*100}%`, background: "#f59e0b" }} />
+                              <div className="h-full transition-all" style={{ width: `${(p / total) * 100}%`, background: "#34d399" }} />
+                              <div className="h-full transition-all" style={{ width: `${(c / total) * 100}%`, background: "#f97316" }} />
+                              <div className="h-full transition-all" style={{ width: `${(f / total) * 100}%`, background: "#f59e0b" }} />
                             </div>
                             <div className="flex gap-4 mt-2">
-                              {[{label:t("protein"),pct:Math.round((p/total)*100),color:"#34d399"},{label:t("carbs"),pct:Math.round((c/total)*100),color:"#f97316"},{label:t("fats"),pct:Math.round((f/total)*100),color:"#f59e0b"}].map(m=>(
+                              {[{ label: t("protein"), pct: Math.round((p / total) * 100), color: "#34d399" }, { label: t("carbs"), pct: Math.round((c / total) * 100), color: "#f97316" }, { label: t("fats"), pct: Math.round((f / total) * 100), color: "#f59e0b" }].map(m => (
                                 <span key={m.label} className="flex items-center gap-1 text-[10px] font-bold" style={{ color: "rgba(255,255,255,0.4)" }}>
                                   <span className="w-2 h-2 rounded-full" style={{ background: m.color }} />
                                   {m.label} {m.pct}%
@@ -781,7 +818,7 @@ export default function ProfilePage() {
                       <div className={cn(
                         "absolute left-0 top-0 bottom-0 w-1",
                         sub.status === "active" ? "bg-primary" :
-                        sub.status === "pending" ? "bg-amber-400" : "bg-red-500"
+                          sub.status === "pending" ? "bg-amber-400" : "bg-red-500"
                       )} />
 
                       <div className="pl-4 pr-4 sm:pl-5 sm:pr-6 py-4 sm:py-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
@@ -789,11 +826,11 @@ export default function ProfilePage() {
                         <div className={cn(
                           "w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0",
                           sub.status === "active" ? "bg-primary/10" :
-                          sub.status === "pending" ? "bg-amber-400/10" : "bg-red-500/10"
+                            sub.status === "pending" ? "bg-amber-400/10" : "bg-red-500/10"
                         )}>
                           <PackageIcon size={20} className={
                             sub.status === "active" ? "text-primary" :
-                            sub.status === "pending" ? "text-amber-400" : "text-red-400"
+                              sub.status === "pending" ? "text-amber-400" : "text-red-400"
                           } />
                         </div>
 
@@ -893,6 +930,94 @@ export default function ProfilePage() {
 
         </AnimatePresence>
       </div>
+
+      {/* Exercise Modal */}
+      <AnimatePresence>
+        {selectedExercise && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setSelectedExercise(null)}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#111111] border border-white/10 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl relative"
+            >
+              <button
+                onClick={() => setSelectedExercise(null)}
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 flex items-center justify-center text-white/50 hover:text-white transition-colors z-10"
+              >
+                <XCircle size={20} />
+              </button>
+
+              {(selectedExercise.exerciseId?.gifUrl || selectedExercise.gifUrl) ? (
+                <div className="w-full aspect-video bg-white/5 flex items-center justify-center overflow-hidden">
+                  <img src={selectedExercise.exerciseId?.gifUrl || selectedExercise.gifUrl} alt={selectedExercise.exerciseId?.name || selectedExercise.name} className="w-full h-full object-cover mix-blend-screen" />
+                </div>
+              ) : (
+                <div className="w-full aspect-video bg-white/5 flex flex-col items-center justify-center">
+                  <Dumbbell size={48} className="text-white/20 mb-2" />
+                  <p className="text-white/40 text-sm">No image available</p>
+                </div>
+              )}
+
+              <div className="p-6">
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div>
+                    <h3 className="text-xl font-extrabold text-white uppercase tracking-tight mb-1">
+                      {selectedExercise.exerciseId?.name || selectedExercise.name || "Unknown Exercise"}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        {selectedExercise.exerciseId?.bodyPart || selectedExercise.bodyPart || "General"}
+                      </span>
+                      {(selectedExercise.exerciseId?.target || selectedExercise.target) && (
+                        <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-white/5 text-white/60 border border-white/10">
+                          🎯 {selectedExercise.exerciseId?.target || selectedExercise.target}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0 bg-primary/5 border border-primary/10 px-3 py-2 rounded-xl">
+                    <p className="text-[10px] uppercase tracking-widest text-primary/60 font-bold mb-0.5">Sets x Reps</p>
+                    <p className="text-sm font-extrabold text-primary">
+                      {selectedExercise.sets} × {selectedExercise.reps}
+                    </p>
+                  </div>
+                </div>
+
+                {(selectedExercise.exerciseId?.equipment || selectedExercise.equipment) && (
+                  <div className="mb-4 flex items-center gap-2 text-sm text-white/60">
+                    <PackageIcon size={14} className="text-white/40" />
+                    <span className="font-semibold capitalize">Equipment: {selectedExercise.exerciseId?.equipment || selectedExercise.equipment}</span>
+                  </div>
+                )}
+
+                {(selectedExercise.exerciseId?.instructions || selectedExercise.instructions) && ((selectedExercise.exerciseId?.instructions || selectedExercise.instructions).length > 0) && (
+                  <div className="space-y-2 mt-5">
+                    <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold mb-2">Instructions</p>
+                    <ol className="space-y-2 text-sm text-white/70 list-decimal list-inside">
+                      {(selectedExercise.exerciseId?.instructions || selectedExercise.instructions).map((inst: string, idx: number) => (
+                        <li key={idx} className="leading-relaxed pl-1">{inst}</li>
+                      ))}
+                    </ol>
+                  </div>
+                )}
+
+                {selectedExercise.restTimeMinutes > 0 && (
+                  <div className="mt-5 p-3 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3">
+                    <Clock size={16} className="text-white/40" />
+                    <p className="text-sm text-white/70 font-semibold">Rest Time: <span className="text-white">{selectedExercise.restTimeMinutes} mins</span></p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
