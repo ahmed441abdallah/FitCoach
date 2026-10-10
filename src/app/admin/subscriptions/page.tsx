@@ -44,8 +44,8 @@ const getInitials = (email: string) => email?.slice(0, 2).toUpperCase() || "??";
 function ProofModal({ sub, onClose, onApprove, onReject, loading }: {
   sub: Subscription;
   onClose: () => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
+  onApprove: (id: string) => void | Promise<void>;
+  onReject: (id: string) => void | Promise<void>;
   loading: boolean;
 }) {
   const sc = STATUS_CONFIG[sub.status] || STATUS_CONFIG.pending;
@@ -168,7 +168,7 @@ function ProofModal({ sub, onClose, onApprove, onReject, loading }: {
 export default function SubscriptionsPage() {
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const LIMIT = 10;
@@ -197,30 +197,54 @@ export default function SubscriptionsPage() {
 
   useEffect(() => { fetchSubs(); }, [fetchSubs]);
 
-  const handleApprove = async (id: string) => {
-    setActionLoading(true);
+  const runSubscriptionAction = async (
+    id: string,
+    action: "approve" | "reject"
+  ): Promise<Subscription | null> => {
+    if (actionLoadingId) return null;
+
+    setActionLoadingId(id);
     try {
-      const res = await axiosInstance.put(`/subscriptions/${id}/approve`, {}, { withCredentials: true });
-      if (res.data.success) {
-        setSubs(prev => prev.map(s => s._id === id ? { ...s, status: "active" as const, paymentStatus: "paid" } : s));
-        if (selected?._id === id) setSelected(prev => prev ? { ...prev, status: "active" as const } : null);
-        showToast("Subscription approved! Email sent to client.");
+      // Axios throws automatically on non-2xx — no need to re-check success manually.
+      // Only verify the shape we actually need: res.data.success flag from backend.
+      const res = await axiosInstance.put(`/subscriptions/${id}/${action}`, {}, { withCredentials: true });
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || `Failed to ${action} subscription`);
       }
-    } catch (e: any) { showToast(e.response?.data?.message || "Failed to approve", false); }
-    finally { setActionLoading(false); }
+      return (res.data.data ?? null) as Subscription | null;
+    } catch (error: any) {
+      // Separate the API failure toast from any subsequent UI errors
+      const msg =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        `Failed to ${action} subscription`;
+      showToast(msg, false);
+      return null;
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const applyUpdatedSubscription = (updated: Subscription) => {
+    setSubs(prev => prev.map(sub => sub._id === updated._id ? { ...sub, ...updated } : sub));
+    setSelected(prev => prev?._id === updated._id ? { ...prev, ...updated } : prev);
+  };
+
+  const handleApprove = async (id: string) => {
+    const updated = await runSubscriptionAction(id, "approve");
+    if (!updated) return;
+
+    applyUpdatedSubscription(updated);
+    showToast("Subscription approved! Email sent to client.");
   };
 
   const handleReject = async (id: string) => {
-    setActionLoading(true);
-    try {
-      const res = await axiosInstance.put(`/subscriptions/${id}/reject`, {}, { withCredentials: true });
-      if (res.data.success) {
-        setSubs(prev => prev.map(s => s._id === id ? { ...s, status: "cancelled" as const } : s));
-        if (selected?._id === id) setSelected(prev => prev ? { ...prev, status: "cancelled" as const } : null);
-        showToast("Subscription rejected.");
-      }
-    } catch (e: any) { showToast(e.response?.data?.message || "Failed to reject", false); }
-    finally { setActionLoading(false); }
+    const updated = await runSubscriptionAction(id, "reject");
+    if (!updated) return;
+
+    applyUpdatedSubscription(updated);
+    showToast("Subscription rejected.");
   };
 
   const handleDownloadInvoice = async (id: string) => {
@@ -379,11 +403,11 @@ export default function SubscriptionsPage() {
                       </button>
                       {sub.status === "pending" && (
                         <>
-                          <button onClick={() => handleApprove(sub._id)} className="w-7 h-7 rounded-lg bg-[#c8fe1b]/10 hover:bg-[#c8fe1b]/20 border border-[#c8fe1b]/20 flex items-center justify-center text-[#c8fe1b] transition-all" title="Approve">
-                            <CheckCircle2 size={13} />
+                          <button disabled={actionLoadingId !== null} onClick={() => handleApprove(sub._id)} className="w-7 h-7 rounded-lg bg-[#c8fe1b]/10 hover:bg-[#c8fe1b]/20 border border-[#c8fe1b]/20 flex items-center justify-center text-[#c8fe1b] transition-all disabled:opacity-50" title="Approve">
+                            {actionLoadingId === sub._id ? <Loader2 size={13} className="animate-spin" /> : <CheckCircle2 size={13} />}
                           </button>
-                          <button onClick={() => handleReject(sub._id)} className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center text-red-400 transition-all" title="Reject">
-                            <XCircle size={13} />
+                          <button disabled={actionLoadingId !== null} onClick={() => handleReject(sub._id)} className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center text-red-400 transition-all disabled:opacity-50" title="Reject">
+                            {actionLoadingId === sub._id ? <Loader2 size={13} className="animate-spin" /> : <XCircle size={13} />}
                           </button>
                         </>
                       )}
@@ -393,8 +417,8 @@ export default function SubscriptionsPage() {
                             className="w-7 h-7 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.07] flex items-center justify-center text-white/40 hover:text-white transition-all">
                             <FileDown size={12} />
                           </button>
-                          <button onClick={() => handleReject(sub._id)} title="Revoke & Cancel" className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center text-red-400 transition-all">
-                            <XCircle size={13} />
+                          <button disabled={actionLoadingId !== null} onClick={() => handleReject(sub._id)} title="Revoke & Cancel" className="w-7 h-7 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 flex items-center justify-center text-red-400 transition-all disabled:opacity-50">
+                            {actionLoadingId === sub._id ? <Loader2 size={13} className="animate-spin" /> : <XCircle size={13} />}
                           </button>
                         </>
                       )}
@@ -441,9 +465,9 @@ export default function SubscriptionsPage() {
           <ProofModal
             sub={selected}
             onClose={() => setSelected(null)}
-            onApprove={(id) => { handleApprove(id); setSelected(null); }}
-            onReject={(id) => { handleReject(id); setSelected(null); }}
-            loading={actionLoading}
+            onApprove={async (id) => { setSelected(null); await handleApprove(id); }}
+            onReject={async (id) => { setSelected(null); await handleReject(id); }}
+            loading={actionLoadingId === selected._id}
           />
         )}
       </AnimatePresence>
