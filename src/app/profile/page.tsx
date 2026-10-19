@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCachedFetch } from "@/hooks/useCachedFetch";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { logout, reset } from "@/lib/features/auth/authSlice";
@@ -105,7 +106,10 @@ export default function ProfilePage() {
 
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [clientProfile, setClientProfile] = useState<ClientProfile | null>(null);
-  const [workoutPlan, setWorkoutPlan] = useState<WorkoutPlan | null>(null);
+  const { data: workoutPlan, loading: workoutLoading, offline: workoutOffline } = useCachedFetch<WorkoutPlan>(
+    "/workout-plans/me",
+    user ? `cache:workout-plan:${user._id}` : "cache:workout-plan:guest"
+  );
   const [dietPlan, setDietPlan] = useState<DietPlan | null>(null);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -144,18 +148,15 @@ export default function ProfilePage() {
     if (!user) { router.push("/login"); return; }
     const fetchData = async () => {
       try {
-        const [subRes, clientRes, workoutRes, dietRes] = await Promise.allSettled([
+        const [subRes, clientRes, dietRes] = await Promise.allSettled([
           axiosInstance.get("/subscriptions/me", { withCredentials: true }),
           axiosInstance.get("/clients/me", { withCredentials: true }),
-          axiosInstance.get("/workout-plans/me", { withCredentials: true }),
           axiosInstance.get("/diet-plans/my-diet-plan", { withCredentials: true }),
         ]);
         if (subRes.status === "fulfilled" && subRes.value.data.success)
           setSubscriptions(subRes.value.data.data);
         if (clientRes.status === "fulfilled" && clientRes.value.data.success)
           setClientProfile(clientRes.value.data.data);
-        if (workoutRes.status === "fulfilled" && workoutRes.value.data.success)
-          setWorkoutPlan(workoutRes.value.data.data);
         if (dietRes.status === "fulfilled" && dietRes.value.data.success)
           setDietPlan(dietRes.value.data.data);
       } catch (e) { console.error(e); }
@@ -481,7 +482,31 @@ export default function ProfilePage() {
               transition={{ duration: 0.3 }}
               className="space-y-6"
             >
-              {workoutPlan ? (
+              {/* Offline notice — shown only when cached data is being displayed */}
+              {workoutOffline && workoutPlan && (
+                <p className="text-xs text-white/40 text-center">
+                  📴 Offline — showing saved plan
+                </p>
+              )}
+
+              {/* Loading skeleton — only when there is no cached data yet */}
+              {workoutLoading && !workoutPlan && (
+                <div className="flex items-center justify-center py-20">
+                  <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                </div>
+              )}
+
+              {!workoutLoading && !workoutPlan ? (
+                <div className="rounded-3xl border border-white/[0.07] p-16 flex flex-col items-center justify-center text-center" style={{ background: "#111111" }}>
+                  <div className="w-20 h-20 rounded-3xl border border-white/[0.06] flex items-center justify-center mb-5" style={{ background: "rgba(200,254,27,0.04)" }}>
+                    <Dumbbell size={32} className="text-primary/40" />
+                  </div>
+                  <h3 className="text-xl font-extrabold text-white mb-2">{t("noWorkoutPlanYet")}</h3>
+                  <p className="text-white/40 text-sm max-w-sm leading-relaxed">
+                    {t("noWorkoutPlanDesc")}
+                  </p>
+                </div>
+              ) : workoutPlan ? (
                 <>
                   {/* Plan Header */}
                   <div className="rounded-3xl border border-white/[0.07] p-6 relative overflow-hidden" style={{ background: "#111111" }}>
@@ -605,17 +630,7 @@ export default function ProfilePage() {
                     ))}
                   </div>
                 </>
-              ) : (
-                <div className="rounded-3xl border border-white/[0.07] p-16 flex flex-col items-center justify-center text-center" style={{ background: "#111111" }}>
-                  <div className="w-20 h-20 rounded-3xl border border-white/[0.06] flex items-center justify-center mb-5" style={{ background: "rgba(200,254,27,0.04)" }}>
-                    <Dumbbell size={32} className="text-primary/40" />
-                  </div>
-                  <h3 className="text-xl font-extrabold text-white mb-2">{t("noWorkoutPlanYet")}</h3>
-                  <p className="text-white/40 text-sm max-w-sm leading-relaxed">
-                    {t("noWorkoutPlanDesc")}
-                  </p>
-                </div>
-              )}
+              ) : null}
             </motion.div>
           )}
 
