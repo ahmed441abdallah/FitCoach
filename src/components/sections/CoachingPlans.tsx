@@ -5,7 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "motion/react";
 import { Check, Zap, Loader2 } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { getPackages } from "@/lib/features/packages/packageSlice";
+import { getPackages, Package } from "@/lib/features/packages/packageSlice";
 import { TransitionLink } from "@/components/layout/TransitionLink";
 import { useTranslations } from "next-intl";
 
@@ -157,7 +157,14 @@ function PlanSkeleton() {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function CoachingPlans() {
+interface CoachingPlansProps {
+  /** Server-prefetched packages from the homepage Server Component.
+   *  When provided, the Redux store is seeded immediately and the
+   *  loading skeleton is never shown on first paint. */
+  initialPackages?: unknown[];
+}
+
+export default function CoachingPlans({ initialPackages = [] }: CoachingPlansProps) {
   const t = useTranslations("home.plans");
   const dispatch = useAppDispatch();
   const { packages, loading, error } = useAppSelector((state) => state.package);
@@ -167,7 +174,16 @@ export default function CoachingPlans() {
   const [selectedDuration, setSelectedDuration] = useState<number>(1);
 
   useEffect(() => {
+    // If the server passed pre-fetched data, seed the store so the skeleton
+    // is never shown on first paint. Then still fire a background refresh.
+    if (initialPackages.length > 0 && packages.length === 0) {
+      dispatch({
+        type: "package/getPackages/fulfilled",
+        payload: initialPackages as Package[],
+      });
+    }
     dispatch(getPackages());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   // Derive unique available durations from the backend data
