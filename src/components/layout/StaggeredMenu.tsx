@@ -43,6 +43,7 @@ export const StaggeredMenu: React.FC = () => {
     { label: t('home'), ariaLabel: 'Go to home page', href: '/' },
     { label: t('exercises'), ariaLabel: 'Exercise library', href: '/exercises' },
     { label: t('calories'), ariaLabel: 'Calorie calculator', href: '/calories' },
+    { label: t('weak'), ariaLabel: 'Weak muscles', href: '/weak' },
   ];
 
   const authItems = mounted && user && user.role !== 'admin' ? [
