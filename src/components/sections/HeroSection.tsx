@@ -1,54 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { TransitionLink } from "../layout";
-import { Dumbbell, UtensilsCrossed, CalendarCheck, ChevronDown } from "lucide-react";
-import dynamic from "next/dynamic";
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-
-// SideRays is heavy WebGL — load only on desktop after the browser is idle.
-// Mobile / reduced-motion / slow connections get a pure-CSS gradient fallback.
-const SideRays = dynamic(() => import("@/components/ui/SideRays"), {
-  ssr: false,
-});
-
-/** True once the browser has had an idle moment (or after 2 s on busy pages). */
-function useIdleReady(): boolean {
-  const [ready, setReady] = useState(false);
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if ("requestIdleCallback" in window) {
-      const id = (window as Window & typeof globalThis).requestIdleCallback(
-        () => setReady(true),
-        { timeout: 2000 }
-      );
-      return () => (window as Window & typeof globalThis).cancelIdleCallback(id);
-    }
-    // Safari fallback
-    const t = setTimeout(() => setReady(true), 300);
-    return () => clearTimeout(t);
-  }, []);
-  return ready;
-}
 
 // ─── HeroSection ──────────────────────────────────────────────────────────────
 export default function HeroSection() {
   const heroRef = useRef<HTMLElement>(null);
   const t = useTranslations("home.hero");
-  const tc = useTranslations("home.trust");
-
-  // Only show WebGL on wide screens after an idle moment
-  const idleReady = useIdleReady();
-  const [isDesktop, setIsDesktop] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  const showWebGL = idleReady && isDesktop;
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -58,27 +19,15 @@ export default function HeroSection() {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" }, delay: 0.2 });
 
       tl.fromTo(
-        "[data-h-badge]",
-        { opacity: 0, y: 20, scale: 0.95 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.6 }
-      )
-        .fromTo(
           "[data-h-line]",
           { opacity: 0, y: 60, rotateX: 18 },
-          { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.12, force3D: true },
-          "-=0.25"
+          { opacity: 1, y: 0, rotateX: 0, duration: 0.8, stagger: 0.12, force3D: true }
         )
         .fromTo(
           "[data-h-desc]",
           { opacity: 0, y: 24 },
           { opacity: 1, y: 0, duration: 0.7 },
           "-=0.4"
-        )
-        .fromTo(
-          "[data-h-trust] > *",
-          { opacity: 0, y: 16 },
-          { opacity: 1, y: 0, duration: 0.45, stagger: 0.08 },
-          "-=0.35"
         )
         .fromTo(
           "[data-h-buttons] > *",
@@ -97,13 +46,6 @@ export default function HeroSection() {
     return () => ctx.revert();
   }, []);
 
-  // Trust items using translations
-  const trustItems = [
-    { icon: Dumbbell, label: t("trust1") },
-    { icon: UtensilsCrossed, label: t("trust2") },
-    { icon: CalendarCheck, label: t("trust3") },
-  ];
-
   return (
     <section
       ref={heroRef}
@@ -111,57 +53,32 @@ export default function HeroSection() {
       aria-label="Hero — Bodybuilding Online Coaching"
       className="relative flex items-center justify-center min-h-screen overflow-hidden"
     >
-      {/* Deep base gradient */}
+      {/* ── Background Video ────────────────────────────────────────────── */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        aria-hidden
+        className="absolute inset-0 w-full h-full object-cover z-0"
+        style={{ filter: "brightness(0.35)" }}
+      >
+        <source src="/hero-bg.mp4" type="video/mp4" />
+      </video>
+
+      {/* Dark overlay gradient for text readability */}
       <div
         aria-hidden
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(ellipse 120% 80% at 50% -10%, oklch(0.18 0.04 80 / 0.35) 0%, oklch(0.08 0.015 250) 55%, oklch(0.06 0.01 250) 100%)",
+            "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.4) 80%, rgba(0,0,0,0.75) 100%)",
         }}
       />
 
-      {/* Side rays (desktop + idle only) / CSS fallback */}
-      <div aria-hidden className="absolute inset-0 z-[1] pointer-events-none">
-        {showWebGL ? (
-          <SideRays
-            speed={2.5}
-            rayColor1="#EAB308"
-            rayColor2="#96c8ff"
-            intensity={2}
-            spread={2}
-            origin="top-right"
-            tilt={0}
-            saturation={1.5}
-            blend={0.75}
-            falloff={1.6}
-            opacity={1}
-          />
-        ) : (
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              background:
-                "radial-gradient(ellipse 60% 50% at 105% -5%, rgba(234,179,8,0.15) 0%, transparent 65%), radial-gradient(ellipse 40% 40% at 100% 0%, rgba(150,200,255,0.08) 0%, transparent 60%)",
-            }}
-          />
-        )}
-      </div>
-
       {/* Content */}
       <div className="relative z-10 w-full max-w-[1400px] mx-auto px-6 md:px-14 lg:px-20 pt-28 pb-32 flex flex-col items-center text-center">
-
-        {/* Badge */}
-        <div
-          data-h-badge
-          className="inline-flex items-center gap-2.5 mb-8 px-5 py-2 rounded-full border border-primary/30 bg-primary/10 hero-anim-item"
-        >
-          <span className="text-primary text-[11px] font-bold uppercase tracking-[0.35em]">
-            {t("tagline")}
-          </span>
-        </div>
-
         {/* Heading */}
         <h1
           className="font-extrabold uppercase leading-[0.9] tracking-tight mb-8"
@@ -200,24 +117,6 @@ export default function HeroSection() {
         >
           {t("subtitle")}
         </p>
-
-        {/* Trust pills */}
-        <div
-          data-h-trust
-          className="flex flex-wrap items-center justify-center gap-3 mb-12 hero-anim-item"
-        >
-          {trustItems.map(({ icon: Icon, label }) => (
-            <div
-              key={label}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/10 bg-white/[0.06]"
-            >
-              <Icon size={13} className="text-primary shrink-0" />
-              <span className="text-white/70 text-[11px] font-semibold uppercase tracking-widest">
-                {label}
-              </span>
-            </div>
-          ))}
-        </div>
 
         {/* CTA Buttons */}
         <div
@@ -282,10 +181,8 @@ export default function HeroSection() {
         }
         .hero-anim-item { opacity: 1; }
         @media (prefers-reduced-motion: reduce) {
-          [data-h-badge],
           [data-h-line],
           [data-h-desc],
-          [data-h-trust] > *,
           [data-h-buttons] > *,
           [data-h-scroll] { opacity: 1 !important; transform: none !important; }
         }

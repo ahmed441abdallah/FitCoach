@@ -14,7 +14,8 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
-    "chat": "Chat"
+    "chat": "Chat",
+    "weak": "Weak Muscles"
   },
   "calories": {
     "title1": "Calorie",
@@ -451,7 +452,7 @@
   "home": {
     "hero": {
       "tagline": "Online Fitness Coaching",
-      "line1": "Train Smarter.",
+      "line1": "Train Smarter,",
       "line2": "Build Your",
       "line3": "Strongest Body.",
       "subtitle": "Personalized workout plans, nutrition guidance, and real accountability from a coach committed to your progress — every single week.",

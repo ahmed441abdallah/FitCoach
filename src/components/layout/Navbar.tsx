@@ -47,7 +47,7 @@ export default function Navbar() {
   }, [user]);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-foreground/[0.06] hidden md:block">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-transparent hidden md:block">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <TransitionLink
@@ -70,6 +70,12 @@ export default function Navbar() {
             className="text-muted-foreground hover:text-primary transition-colors duration-200"
           >
             {t("calories")}
+          </TransitionLink>
+          <TransitionLink
+            href="/weak"
+            className="text-muted-foreground hover:text-primary transition-colors duration-200"
+          >
+            {t("weak")}
           </TransitionLink>
         </div>
 
@@ -178,6 +184,12 @@ export default function Navbar() {
                   className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:bg-foreground/5 transition-all duration-200 text-left"
                 >
                   {t("calories")}
+                </button>
+                <button
+                  onClick={() => { setOpen(false); navigate("/weak"); }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold uppercase tracking-widest text-muted-foreground hover:text-primary hover:bg-foreground/5 transition-all duration-200 text-left"
+                >
+                  {t("weak")}
                 </button>
                 {/* Mobile: Workout Log & Progress — subscribed users only */}
                 {mounted && hasActiveSub && (
